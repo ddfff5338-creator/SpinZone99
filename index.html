@@ -291,32 +291,28 @@
 <div class="overlay" id="depositModal">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('depositModal')">✕</button>
-    <h2>📦 Deposit a Pet</h2>
-    <p class="modal-sub">Trade your pet directly to our middleman in PS99 — no typing needed!</p>
-
-    <!-- Trade instructions box -->
-    <div class="instructions-box" style="margin-bottom:1.2rem">
-      <div class="step"><div class="step-num">1</div><div>Open <strong>Pet Simulator 99</strong> and find the player <span class="middleman-name">SpinZone99</span>.</div></div>
-      <div class="step"><div class="step-num">2</div><div>Send them a <strong>trade request</strong> and place the pet you want to deposit.</div></div>
-      <div class="step"><div class="step-num">3</div><div>Once the middleman accepts and confirms, your pet will <strong>automatically appear</strong> in your inventory here — ready to flip!</div></div>
+    <h2>Deposit a Pet</h2>
+    <p class="modal-sub">Enter your pet name, then trade it to our middleman in PS99.</p>
+    <div class="err" id="depositErr"></div>
+    <div class="field">
+      <label>Pet Name (PS99 name)</label>
+      <input type="text" id="depositPetName" placeholder="e.g. Huge Cat" oninput="lookupDepositPet()" />
+      <div class="field-hint" id="depositHint"></div>
     </div>
-
-    <!-- Middleman username copy box -->
-    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:1.2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;">
-      <div>
-        <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.25rem;text-transform:uppercase;letter-spacing:1px">Trade to</div>
-        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:var(--purple-light)">SpinZone99</div>
+    <div class="pet-preview" id="depositPreview">
+      <img id="depositPreviewImg" src="" alt="" />
+      <div class="pet-preview-info">
+        <div class="pname" id="depositPreviewName"></div>
+        <div class="pval" id="depositPreviewVal"></div>
       </div>
-      <button onclick="copyMiddleman()" id="copyMMBtn" style="background:rgba(147,51,234,0.15);border:1px solid rgba(147,51,234,0.4);color:var(--purple-light);padding:0.45rem 1rem;border-radius:8px;cursor:pointer;font-size:0.82rem;font-family:'DM Sans',sans-serif;white-space:nowrap;">Copy Name</button>
     </div>
-
-    <!-- Pending status checker -->
-    <div id="depositPendingStatus" style="display:none;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:10px;padding:0.85rem 1rem;margin-bottom:1rem;font-size:0.85rem;color:#fbbf24;display:flex;align-items:center;gap:0.6rem;">
-      <span style="font-size:1.1rem">⏳</span>
-      <span id="depositPendingMsg">Waiting for middleman to confirm your trade...</span>
+    <div class="instructions-box">
+      <div class="step"><div class="step-num">1</div><div>Enter your pet name above and confirm the RAP value looks right.</div></div>
+      <div class="step"><div class="step-num">2</div><div>Click <strong>Submit Deposit</strong> — a pending entry will appear in the lobby.</div></div>
+      <div class="step"><div class="step-num">3</div><div>Trade your pet to <span class="middleman-name">SpinZone99</span> in PS99.</div></div>
+      <div class="step"><div class="step-num">4</div><div>Once the middleman confirms receipt, your pet becomes flippable!</div></div>
     </div>
-
-    <button class="btn btn-purple" style="width:100%;padding:0.75rem" onclick="closeModal('depositModal')">Got it — I'll trade now!</button>
+    <button class="btn btn-purple" style="width:100%; padding:0.75rem" onclick="submitDeposit()">Submit Deposit Request</button>
   </div>
 </div>
 
@@ -395,7 +391,7 @@
 </footer>
 
 <script>
-  const API = 'http://localhost:3000';
+  const API = 'https://spinzone99-production.up.railway.app';
   let token = localStorage.getItem('token');
   let username = localStorage.getItem('username');
 
@@ -431,7 +427,7 @@
   let myDeposits = [];
 
   function connectWS() {
-    ws = new WebSocket('ws://localhost:3000');
+    ws = new WebSocket('wss://spinzone99-production.up.railway.app');
     ws.onmessage = (e) => {
       const msg = JSON.parse(e.data);
       if (msg.type === 'deposits') { allDeposits = msg.deposits; renderAll(); }
@@ -709,23 +705,11 @@
   // ---- DEPOSIT MODAL ----
   function openDepositModal() {
     if (!token) { alert('🔒 Login to deposit!'); location.href = 'login.html'; return; }
-    // Show pending status if they already have one waiting
-    const pending = myDeposits.find(d => d.status === 'pending');
-    const pendingBox = document.getElementById('depositPendingStatus');
-    if (pending) {
-      pendingBox.style.display = 'flex';
-      document.getElementById('depositPendingMsg').textContent = `Waiting for middleman to confirm your trade of "${pending.petName}"...`;
-    } else {
-      pendingBox.style.display = 'none';
-    }
+    document.getElementById('depositPetName').value = '';
+    document.getElementById('depositHint').textContent = '';
+    document.getElementById('depositPreview').classList.remove('visible');
+    hideErr('depositErr');
     openModal('depositModal');
-  }
-
-  function copyMiddleman() {
-    navigator.clipboard.writeText('SpinZone99');
-    const btn = document.getElementById('copyMMBtn');
-    btn.textContent = '✓ Copied!';
-    setTimeout(() => btn.textContent = 'Copy Name', 2000);
   }
 
   let depositLookupTimer = null;

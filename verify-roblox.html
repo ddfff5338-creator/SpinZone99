@@ -233,7 +233,7 @@
       document.getElementById('verifyBtn').disabled = false;
 
       // Save code to server
-      fetch('http://localhost:3000/api/roblox/generate-code', {
+      fetch('https://spinzone99-production.up.railway.app/api/roblox/generate-code', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -263,7 +263,7 @@
       btn.textContent = 'Checking...';
 
       try {
-        const response = await fetch('http://localhost:3000/api/roblox/verify', {
+        const response = await fetch('https://spinzone99-production.up.railway.app/api/roblox/verify', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
