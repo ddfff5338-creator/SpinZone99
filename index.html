@@ -292,25 +292,12 @@
   <div class="modal">
     <button class="modal-close" onclick="closeModal('depositModal')">✕</button>
     <h2>Deposit a Pet</h2>
-    <p class="modal-sub">Enter your pet name, then trade it to our middleman in PS99.</p>
+    <p class="modal-sub">Click below to submit a deposit request, then trade your pet to our middleman in PS99.</p>
     <div class="err" id="depositErr"></div>
-    <div class="field">
-      <label>Pet Name (PS99 name)</label>
-      <input type="text" id="depositPetName" placeholder="e.g. Huge Cat" oninput="lookupDepositPet()" />
-      <div class="field-hint" id="depositHint"></div>
-    </div>
-    <div class="pet-preview" id="depositPreview">
-      <img id="depositPreviewImg" src="" alt="" />
-      <div class="pet-preview-info">
-        <div class="pname" id="depositPreviewName"></div>
-        <div class="pval" id="depositPreviewVal"></div>
-      </div>
-    </div>
     <div class="instructions-box">
-      <div class="step"><div class="step-num">1</div><div>Enter your pet name above and confirm the RAP value looks right.</div></div>
-      <div class="step"><div class="step-num">2</div><div>Click <strong>Submit Deposit</strong> — a pending entry will appear in the lobby.</div></div>
-      <div class="step"><div class="step-num">3</div><div>Trade your pet to <span class="middleman-name">SpinZone99</span> in PS99.</div></div>
-      <div class="step"><div class="step-num">4</div><div>Once the middleman confirms receipt, your pet becomes flippable!</div></div>
+      <div class="step"><div class="step-num">1</div><div>Click <strong>Submit Request</strong> below.</div></div>
+      <div class="step"><div class="step-num">2</div><div>Trade your pet to <span class="middleman-name">SpinZone99</span> in PS99.</div></div>
+      <div class="step"><div class="step-num">3</div><div>The middleman will confirm your pet and it will appear in the lobby ready to flip!</div></div>
     </div>
     <button class="btn btn-purple" style="width:100%; padding:0.75rem" onclick="submitDeposit()">Submit Deposit Request</button>
   </div>
@@ -649,65 +636,102 @@
     } catch { showErr('startFlipErr', 'Could not connect.'); }
   }
 
-  // ---- JOIN FLIP (from flip card) ----
-  function openJoinFlipModal(flipId, flipValue, petName) {
-    if (!token) { alert('🔒 Login to join!'); location.href = 'login.html'; return; }
-    selectedFlipId = flipId;
-    selectedJoinDepositId = null;
-    document.getElementById('joinFlipDesc').textContent = `Flip value: ${Number(flipValue).toLocaleString()} RAP (${petName}). Your pet must be within 10%.`;
-    hideErr('joinFlipErr');
-    const myConfirmed = myDeposits.filter(d => d.status === 'confirmed');
-    const picker = document.getElementById('joinFlipPicker');
-    if (myConfirmed.length === 0) {
-      picker.innerHTML = '<p style="color:var(--muted);font-size:0.85rem;grid-column:1/-1">No confirmed deposits. Deposit a pet first!</p>';
-    } else {
-      picker.innerHTML = myConfirmed.map(d => `
-        <div class="picker-card" onclick="selectJoinFlipDeposit('${d.id}', this)">
-          <img src="${d.petImage}" onerror="this.style.display='none'" alt="" />
-          <div class="pname">${d.petName}</div>
-          <div class="pval">${d.petValue.toLocaleString()} RAP</div>
-        </div>
-      `).join('');
-    }
-    openModal('joinFlipModal');
-  }
+ // =========================
+// COINFLIP STATE
+// =========================
 
-  function selectJoinFlipDeposit(id, el) {
-    selectedJoinDepositId = id;
-    document.querySelectorAll('#joinFlipPicker .picker-card').forEach(c => c.classList.remove('selected'));
-    el.classList.add('selected');
-  }
+const flipState = {
+  selectedDepositId: null,
+  selectedFlipId: null,
+  selectedJoinDepositId: null,
+  joining: false,
+  creating: false,
+  canceling: false
+};
 
-  async function submitJoinFlip() {
-    if (!selectedJoinDepositId) { showErr('joinFlipErr', 'Select one of your deposits.'); return; }
-    try {
-      const res = await fetch(`${API}/api/flips/join`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-        body: JSON.stringify({ flipId: selectedFlipId, depositId: selectedJoinDepositId })
-      });
-      const data = await res.json();
-      if (res.ok) closeModal('joinFlipModal');
-      else showErr('joinFlipErr', data.error);
-    } catch { showErr('joinFlipErr', 'Could not connect.'); }
-  }
+// =========================
+// HELPERS
+// =========================
 
-  // ---- CANCEL FLIP ----
-  async function cancelFlip(flipId) {
-    if (!confirm('Cancel this flip?')) return;
-    await fetch(`${API}/api/flips/cancel`, {
+function getConfirmedDeposits() {
+  return myDeposits.filter(d => d.status === 'confirmed');
+}
+
+function findFlipByCreatorDeposit(depositId) {
+  return allFlips.find(f =>
+    f.status === 'waiting' &&
+    f.creator &&
+    f.creator.depositId === depositId
+  );
+}
+
+function disableButton(btn, text = 'Loading...') {
+  btn.disabled = true;
+  btn.dataset.originalText = btn.innerHTML;
+  btn.innerHTML = text;
+}
+
+function enableButton(btn) {
+  btn.disabled = false;
+  btn.innerHTML = btn.dataset.originalText;
+}
+
+// =========================
+// DEPOSIT CLICK
+// =========================
+
+function onDepositClick(depositId, depUsername, petValue, petName, isMe) {
+  if (isMe === 'true') {
+    openStartFlipModal(depositId, petName, petValue);
+  } else {
+    openJoinDepositModal(depositId, depUsername, petName, petValue);
+  }
+}
+
+// =========================
+// START FLIP
+// =========================
+
+function openStartFlipModal(depositId, petName, petValue) {
+  flipState.selectedDepositId = depositId;
+
+  document.getElementById('startFlipDesc').textContent =
+    `Put "${petName}" (${Number(petValue).toLocaleString()} RAP) up for a 50/50 flip?`;
+
+  hideErr('startFlipErr');
+  openModal('startFlipModal');
+}
+
+async function submitStartFlip() {
+  if (flipState.creating) return;
+
+  const btn = event.currentTarget;
+
+  try {
+    flipState.creating = true;
+    disableButton(btn, 'Creating Flip...');
+
+    const res = await fetch(`${API}/api/flips/create`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-      body: JSON.stringify({ flipId })
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + token
+      },
+      body: JSON.stringify({
+        depositId: flipState.selectedDepositId
+      })
     });
+  } catch(e) {
+    console.error(e);
+  } finally {
+    flipState.creating = false;
+    enableButton(btn);
   }
+}
 
-  // ---- DEPOSIT MODAL ----
-  function openDepositModal() {
+// ---- DEPOSIT MODAL ----
+function openDepositModal() {
     if (!token) { alert('🔒 Login to deposit!'); location.href = 'login.html'; return; }
-    document.getElementById('depositPetName').value = '';
-    document.getElementById('depositHint').textContent = '';
-    document.getElementById('depositPreview').classList.remove('visible');
     hideErr('depositErr');
     openModal('depositModal');
   }
@@ -740,19 +764,17 @@
   }
 
   async function submitDeposit() {
-    const petName = document.getElementById('depositPetName').value.trim();
     hideErr('depositErr');
-    if (!petName) { showErr('depositErr', 'Enter a pet name'); return; }
     try {
       const res = await fetch(`${API}/api/deposits/request`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-        body: JSON.stringify({ petName })
+        body: JSON.stringify({})
       });
       const data = await res.json();
       if (res.ok) {
         closeModal('depositModal');
-        showNotice(`📦 Deposit submitted! Now trade "${data.deposit.petName}" to SpinZone99 in PS99.`);
+        showNotice('📦 Deposit request submitted! Now trade your pet to SpinZone99 in PS99 and wait for confirmation.');
         loadMyDeposits();
       } else showErr('depositErr', data.error);
     } catch { showErr('depositErr', 'Could not connect to server.'); }

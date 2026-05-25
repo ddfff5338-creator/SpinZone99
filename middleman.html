@@ -16,7 +16,6 @@
     .logo { font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:900; color:var(--purple-light); }
     .admin-badge { background:rgba(147,51,234,0.2); border:1px solid var(--purple); color:var(--purple-light); padding:0.3rem 0.8rem; border-radius:99px; font-size:0.78rem; }
 
-    /* LOGIN */
     .login-wrap { display:flex; justify-content:center; align-items:center; min-height:calc(100vh - 60px); padding:2rem; }
     .login-box { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:2.5rem; width:100%; max-width:380px; text-align:center; }
     .login-box h2 { font-family:'Syne',sans-serif; font-size:1.5rem; font-weight:800; margin-bottom:0.5rem; }
@@ -30,11 +29,9 @@
     .btn-purple:hover { background:#7c22d3; }
     .btn-green { background:rgba(74,222,128,0.15); color:var(--green); border:1px solid rgba(74,222,128,0.4); font-size:0.82rem; padding:0.4rem 0.9rem; }
     .btn-green:hover { background:rgba(74,222,128,0.25); }
-    .btn-yellow { background:rgba(251,191,36,0.15); color:var(--yellow); border:1px solid rgba(251,191,36,0.4); font-size:0.82rem; padding:0.4rem 0.9rem; }
     .btn-red { background:rgba(248,113,113,0.1); color:var(--red); border:1px solid rgba(248,113,113,0.3); font-size:0.82rem; padding:0.4rem 0.9rem; }
     .err { background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); color:var(--red); padding:0.7rem; border-radius:8px; font-size:0.85rem; margin-bottom:1rem; display:none; }
 
-    /* DASHBOARD */
     #dashboard { display:none; }
     .dash-header { padding:1.5rem 2rem; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
     .dash-header h1 { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:800; }
@@ -60,42 +57,30 @@
     .sp-won { background:rgba(74,222,128,0.15); color:var(--green); border:1px solid rgba(74,222,128,0.4); }
     .sp-returned { background:rgba(107,107,138,0.15); color:var(--muted); border:1px solid var(--border); }
     .sp-sent { background:rgba(107,107,138,0.1); color:var(--muted); border:1px solid var(--border); }
-    .action-btns { display:flex; gap:0.5rem; flex-wrap:wrap; }
+    .action-btns { display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; }
     .time-ago { font-size:0.75rem; color:var(--muted); }
-    /* QUICK DEPOSIT */
-    .quick-deposit-wrap { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:1.5rem; margin-bottom:2rem; }
-    .quick-deposit-wrap h2 { font-family:'Syne',sans-serif; font-size:1rem; font-weight:800; margin-bottom:0.4rem; color:var(--green); }
-    .quick-deposit-wrap > p { font-size:0.83rem; color:var(--muted); margin-bottom:1rem; line-height:1.5; }
-    .qd-username-row { display:flex; gap:0.75rem; align-items:flex-end; margin-bottom:1rem; }
-    .qf { flex:1; }
-    .qf label { display:block; font-size:0.75rem; color:var(--muted); margin-bottom:0.35rem; text-transform:uppercase; letter-spacing:0.5px; }
-    .qf input { width:100%; padding:0.65rem 0.9rem; background:var(--surface2); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:0.9rem; font-family:'DM Sans',sans-serif; outline:none; }
-    .qf input:focus { border-color:var(--green); }
-    .common-pets-label { font-size:0.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.5rem; }
-    .common-pets { display:flex; flex-wrap:wrap; gap:0.4rem; margin-bottom:1rem; }
-    .common-pet-btn { background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:0.3rem 0.75rem; border-radius:99px; font-size:0.78rem; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s; white-space:nowrap; }
-    .common-pet-btn:hover { border-color:var(--green); color:var(--green); }
-    .pet-rows { display:flex; flex-direction:column; gap:0.5rem; margin-bottom:0.75rem; }
-    .pet-row-item { display:flex; gap:0.6rem; align-items:center; background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:0.5rem 0.75rem; }
-    .pet-row-item .autocomplete-wrap { flex:1; position:relative; }
-    .pet-row-item input { width:100%; padding:0.5rem 0.75rem; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:0.88rem; font-family:'DM Sans',sans-serif; outline:none; }
-    .pet-row-item input:focus { border-color:var(--green); }
-    .pet-row-preview { display:flex; align-items:center; gap:0.5rem; min-width:150px; }
-    .pet-row-preview img { width:32px; height:32px; object-fit:contain; border-radius:5px; background:var(--bg); }
-    .pet-row-preview .prname { font-size:0.78rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80px; }
-    .pet-row-preview .prval { font-size:0.7rem; color:var(--purple-light); }
-    .pet-row-remove { background:none; border:none; color:var(--muted); font-size:1rem; cursor:pointer; padding:0.2rem 0.4rem; border-radius:4px; flex-shrink:0; }
-    .pet-row-remove:hover { color:var(--red); }
-    .ac-dropdown { position:absolute; top:calc(100% + 4px); left:0; right:0; background:var(--surface); border:1px solid var(--border); border-radius:8px; z-index:50; max-height:160px; overflow-y:auto; display:none; box-shadow:0 8px 24px rgba(0,0,0,0.4); }
+
+    /* FILL PET INLINE */
+    .fill-pet-wrap { display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; }
+    .fill-pet-wrap .ac-wrap { position:relative; }
+    .fill-pet-wrap input {
+      padding:0.4rem 0.75rem; background:var(--surface2); border:1px solid var(--border);
+      border-radius:8px; color:var(--text); font-size:0.82rem; font-family:'DM Sans',sans-serif;
+      outline:none; width:200px;
+    }
+    .fill-pet-wrap input:focus { border-color:var(--green); }
+    .ac-dropdown {
+      position:absolute; top:calc(100% + 4px); left:0; min-width:260px;
+      background:var(--surface); border:1px solid var(--border); border-radius:8px;
+      z-index:100; max-height:200px; overflow-y:auto; display:none;
+      box-shadow:0 8px 24px rgba(0,0,0,0.5);
+    }
     .ac-dropdown.open { display:block; }
     .ac-item { padding:0.5rem 0.75rem; font-size:0.83rem; cursor:pointer; display:flex; align-items:center; gap:0.6rem; }
     .ac-item:hover { background:rgba(147,51,234,0.15); }
     .ac-item img { width:28px; height:28px; object-fit:contain; border-radius:4px; background:var(--surface2); }
-    .qd-actions { display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center; }
-    .btn-add-pet { background:var(--surface2); border:1px solid var(--border); color:var(--muted); padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-size:0.82rem; font-family:'DM Sans',sans-serif; transition:all 0.2s; }
-    .btn-add-pet:hover { border-color:var(--purple); color:var(--purple-light); }
-    .qs-err { background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); color:var(--red); padding:0.6rem 0.9rem; border-radius:8px; font-size:0.83rem; margin-top:0.75rem; display:none; }
-    .qs-ok { background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.3); color:var(--green); padding:0.6rem 0.9rem; border-radius:8px; font-size:0.83rem; margin-top:0.75rem; display:none; }
+    .ac-item .ac-val { margin-left:auto; font-size:0.72rem; color:var(--purple-light); white-space:nowrap; }
+    .fill-preview { font-size:0.75rem; color:var(--green); white-space:nowrap; }
   </style>
 </head>
 <body>
@@ -127,42 +112,14 @@
   </div>
   <div class="dash-body">
 
-    <!-- QUICK DEPOSIT CREATOR -->
-    <div class="quick-deposit-wrap">
-      <h2>⚡ Create Deposit from Trade</h2>
-      <p>Player traded you pets in PS99? Enter their SpinZone username, add each pet, then hit Confirm All.</p>
-
-      <!-- Username -->
-      <div class="qd-username-row">
-        <div class="qf">
-          <label>SpinZone Username</label>
-          <input type="text" id="qdUsername" placeholder="e.g. killerpro123" />
-        </div>
-      </div>
-
-      <!-- Common pet quick-add buttons -->
-      <div class="common-pets-label">⚡ Quick Add Common Pets</div>
-      <div class="common-pets" id="commonPetBtns"></div>
-
-      <!-- Pet rows -->
-      <div class="pet-rows" id="petRows"></div>
-
-      <!-- Actions -->
-      <div class="qd-actions">
-        <button class="btn-add-pet" onclick="addPetRow()">+ Add Pet</button>
-        <button class="btn btn-green" style="padding:0.6rem 1.4rem" onclick="submitQuickDeposit()">✓ Confirm All Deposits</button>
-      </div>
-
-      <div class="qs-err" id="qdErr"></div>
-      <div class="qs-ok" id="qdOk"></div>
-    </div>
-
-    <!-- PENDING -->
-    <div class="section-title">⏳ Pending Deposits <span class="count-badge" id="pendingCount">0</span></div>
-    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">These players have submitted a deposit request. Once they trade the pet to you in PS99, click <strong style="color:var(--green)">Confirm</strong>.</p>
+    <!-- PENDING — player sent request, waiting for you to fill pet -->
+    <div class="section-title">⏳ Pending Requests <span class="count-badge" id="pendingCount">0</span></div>
+    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">
+      Player clicked Deposit and is trading their pet to you in PS99. Once you receive it, search the pet name below and click <strong style="color:var(--green)">Confirm</strong>.
+    </p>
     <table class="deposit-table" id="pendingTable">
-      <thead><tr><th>Pet</th><th>Player</th><th>Requested</th><th>Actions</th></tr></thead>
-      <tbody id="pendingBody"><tr class="empty-row"><td colspan="4">No pending deposits</td></tr></tbody>
+      <thead><tr><th>Player</th><th>Requested</th><th>Pet Received (search & confirm)</th><th>Reject</th></tr></thead>
+      <tbody id="pendingBody"><tr><td colspan="4" style="color:var(--muted);padding:1rem">No pending requests</td></tr></tbody>
     </table>
 
     <!-- CONFIRMED / IN FLIP -->
@@ -170,22 +127,22 @@
     <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">These pets are confirmed and may be in a flip. No action needed unless returning.</p>
     <table class="deposit-table" id="activeTable">
       <thead><tr><th>Pet</th><th>Player</th><th>Status</th><th>Actions</th></tr></thead>
-      <tbody id="activeBody"><tr class="empty-row"><td colspan="4">None</td></tr></tbody>
+      <tbody id="activeBody"><tr><td colspan="4" style="color:var(--muted);padding:1rem">None</td></tr></tbody>
     </table>
 
     <!-- WON — needs sending -->
     <div class="section-title">🏆 Won — Needs Sending <span class="count-badge" id="wonCount">0</span></div>
-    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">These players won a flip. Trade the pet to them in PS99, then click <strong style="color:var(--green)">Mark Sent</strong>.</p>
+    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">Trade the pet to these players in PS99, then click <strong style="color:var(--green)">Mark Sent</strong>.</p>
     <table class="deposit-table" id="wonTable">
       <thead><tr><th>Pet</th><th>Send To</th><th>Won At</th><th>Actions</th></tr></thead>
-      <tbody id="wonBody"><tr class="empty-row"><td colspan="4">No pending payouts</td></tr></tbody>
+      <tbody id="wonBody"><tr><td colspan="4" style="color:var(--muted);padding:1rem">No pending payouts</td></tr></tbody>
     </table>
 
     <!-- HISTORY -->
     <div class="section-title">📋 Recent History</div>
     <table class="deposit-table" id="historyTable">
       <thead><tr><th>Pet</th><th>Player</th><th>Status</th><th>Time</th></tr></thead>
-      <tbody id="historyBody"><tr class="empty-row"><td colspan="4">No history yet</td></tr></tbody>
+      <tbody id="historyBody"><tr><td colspan="4" style="color:var(--muted);padding:1rem">No history yet</td></tr></tbody>
     </table>
 
   </div>
@@ -194,6 +151,21 @@
 <script>
   const API = 'https://spinzone99-production.up.railway.app';
   let secret = '';
+  let rapList = [];
+
+  // Load RAP list for autocomplete
+  async function loadRapList() {
+    try {
+      const res = await fetch('https://ps99.biggamesapi.io/api/rap');
+      const data = await res.json();
+      rapList = (data.data || []).filter(p => p.configData?.id).map(p => ({
+        name: p.configData.id,
+        value: p.value || 0,
+        image: `https://biggamesapi.io/image/${encodeURIComponent(p.configData.id)}`
+      }));
+    } catch {}
+  }
+  loadRapList();
 
   function login() {
     const pw = document.getElementById('mmPassword').value;
@@ -203,7 +175,7 @@
   }
 
   function timeAgo(ts) {
-    const s = Math.floor((Date.now() - ts) / 1000);
+    const s = Math.floor((Date.now() - new Date(ts)) / 1000);
     if (s < 60) return `${s}s ago`;
     if (s < 3600) return `${Math.floor(s/60)}m ago`;
     if (s < 86400) return `${Math.floor(s/3600)}h ago`;
@@ -250,63 +222,149 @@
 
   function petCell(d) {
     return `<div class="pet-cell">
-      <img src="${d.petImage}" onerror="this.style.display='none'" alt="" />
-      <div><div class="pname">${d.petName}</div><div class="pval">${d.petValue.toLocaleString()} RAP</div></div>
+      ${d.petImage ? `<img src="${d.petImage}" onerror="this.style.display='none'" alt="" />` : ''}
+      <div><div class="pname">${d.petName}</div><div class="pval">${d.petValue > 0 ? d.petValue.toLocaleString() + ' RAP' : ''}</div></div>
     </div>`;
   }
 
+  // Per-row state for fill inputs
+  const fillInputTimers = {};
+  const fillSelected = {}; // depositId -> { name, value, image }
+
   function renderPending(deposits) {
     const tbody = document.getElementById('pendingBody');
-    if (deposits.length === 0) { tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No pending deposits 🎉</td></tr>'; return; }
-    tbody.innerHTML = deposits.map(d => `
-      <tr>
-        <td>${petCell(d)}</td>
+    if (deposits.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);padding:1rem">No pending requests 🎉</td></tr>';
+      return;
+    }
+    tbody.innerHTML = deposits.map(d => {
+      const did = d._id || d.id;
+      return `<tr id="pendingRow_${did}">
         <td><strong>@${d.username}</strong></td>
         <td><span class="time-ago">${timeAgo(d.createdAt)}</span></td>
         <td>
-          <div class="action-btns">
-            <button class="btn btn-green" onclick="confirmDeposit('${d.id}')">✓ Confirm Received</button>
-            <button class="btn btn-red" onclick="returnDeposit('${d.id}')">✗ Reject</button>
+          <div class="fill-pet-wrap">
+            <div class="ac-wrap">
+              <input type="text" id="fillInput_${did}" placeholder="Search pet name…"
+                oninput="onFillInput('${did}')" autocomplete="off" />
+              <div class="ac-dropdown" id="fillDrop_${did}"></div>
+            </div>
+            <span class="fill-preview" id="fillPreview_${did}"></span>
+            <button class="btn btn-green" onclick="fillAndConfirm('${did}')">✓ Confirm</button>
           </div>
         </td>
-      </tr>`).join('');
+        <td>
+          <button class="btn btn-red" onclick="rejectDeposit('${did}')">✗ Reject</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function onFillInput(depositId) {
+    clearTimeout(fillInputTimers[depositId]);
+    fillSelected[depositId] = null;
+    const input = document.getElementById(`fillInput_${depositId}`);
+    const drop = document.getElementById(`fillDrop_${depositId}`);
+    const preview = document.getElementById(`fillPreview_${depositId}`);
+    const q = input.value.trim().toLowerCase();
+    preview.textContent = '';
+
+    if (!q) { drop.classList.remove('open'); return; }
+
+    const matches = rapList.filter(p => p.name.toLowerCase().includes(q)).slice(0, 8);
+    if (matches.length > 0) {
+      drop.innerHTML = matches.map(p =>
+        `<div class="ac-item" onmousedown="selectFillPet('${depositId}', '${p.name.replace(/'/g,"\\'")}', ${p.value}, '${p.image}')">
+          <img src="${p.image}" onerror="this.style.display='none'" alt="" />
+          <span>${p.name}</span>
+          <span class="ac-val">${p.value.toLocaleString()}</span>
+        </div>`
+      ).join('');
+      drop.classList.add('open');
+    } else {
+      drop.classList.remove('open');
+    }
+  }
+
+  function selectFillPet(depositId, name, value, image) {
+    fillSelected[depositId] = { name, value, image };
+    const input = document.getElementById(`fillInput_${depositId}`);
+    const drop = document.getElementById(`fillDrop_${depositId}`);
+    const preview = document.getElementById(`fillPreview_${depositId}`);
+    if (input) input.value = name;
+    drop.classList.remove('open');
+    preview.textContent = `${value.toLocaleString()} RAP`;
+  }
+
+  async function fillAndConfirm(depositId) {
+    const selected = fillSelected[depositId];
+    const inputVal = document.getElementById(`fillInput_${depositId}`)?.value?.trim();
+    const petName = selected?.name || inputVal;
+
+    if (!petName) { alert('❌ Search and select a pet first.'); return; }
+
+    const res = await fetch(`${API}/api/admin/deposits/fill`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret, depositId, petName })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      // Remove row immediately for snappy feel
+      document.getElementById(`pendingRow_${depositId}`)?.remove();
+      loadDeposits();
+    } else {
+      alert('❌ ' + data.error);
+    }
+  }
+
+  async function rejectDeposit(depositId) {
+    if (!confirm('Reject and cancel this deposit request?')) return;
+    const res = await fetch(`${API}/api/admin/deposits/return`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret, depositId })
+    });
+    const data = await res.json();
+    if (res.ok) loadDeposits();
+    else alert('❌ ' + data.error);
   }
 
   function renderActive(deposits) {
     const tbody = document.getElementById('activeBody');
-    if (deposits.length === 0) { tbody.innerHTML = '<tr class="empty-row"><td colspan="4">None active</td></tr>'; return; }
-    tbody.innerHTML = deposits.map(d => `
-      <tr>
+    if (deposits.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);padding:1rem">None active</td></tr>'; return; }
+    tbody.innerHTML = deposits.map(d => {
+      const did = d._id || d.id;
+      return `<tr>
         <td>${petCell(d)}</td>
         <td><strong>@${d.username}</strong></td>
         <td><span class="status-pill sp-${d.status}">${d.status === 'in_flip' ? '🪙 In Flip' : '✅ Confirmed'}</span></td>
         <td>
-          <div class="action-btns">
-            <button class="btn btn-red" onclick="returnDeposit('${d.id}')">↩ Return</button>
-          </div>
+          <button class="btn btn-red" onclick="returnDeposit('${did}')">↩ Return</button>
         </td>
-      </tr>`).join('');
+      </tr>`;
+    }).join('');
   }
 
   function renderWon(deposits) {
     const tbody = document.getElementById('wonBody');
-    if (deposits.length === 0) { tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No pending payouts 🎉</td></tr>'; return; }
-    tbody.innerHTML = deposits.map(d => `
-      <tr>
+    if (deposits.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);padding:1rem">No pending payouts 🎉</td></tr>'; return; }
+    tbody.innerHTML = deposits.map(d => {
+      const did = d._id || d.id;
+      return `<tr>
         <td>${petCell(d)}</td>
         <td><strong style="color:var(--green)">@${d.username}</strong></td>
         <td><span class="time-ago">${timeAgo(d.createdAt)}</span></td>
         <td>
-          <div class="action-btns">
-            <button class="btn btn-green" onclick="markSent('${d.id}')">✓ Sent to Winner</button>
-          </div>
+          <button class="btn btn-green" onclick="markSent('${did}')">✓ Sent to Winner</button>
         </td>
-      </tr>`).join('');
+      </tr>`;
+    }).join('');
   }
 
   function renderHistory(deposits) {
     const tbody = document.getElementById('historyBody');
-    if (deposits.length === 0) { tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No history yet</td></tr>'; return; }
+    if (deposits.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);padding:1rem">No history yet</td></tr>'; return; }
     tbody.innerHTML = deposits.map(d => `
       <tr>
         <td>${petCell(d)}</td>
@@ -314,17 +372,6 @@
         <td><span class="status-pill sp-${d.status}">${d.status}</span></td>
         <td><span class="time-ago">${timeAgo(d.createdAt)}</span></td>
       </tr>`).join('');
-  }
-
-  async function confirmDeposit(id) {
-    const res = await fetch(`${API}/api/admin/deposits/confirm`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret, depositId: id })
-    });
-    const data = await res.json();
-    alert(res.ok ? '✅ ' + data.message : '❌ ' + data.error);
-    loadDeposits();
   }
 
   async function returnDeposit(id) {
@@ -335,8 +382,8 @@
       body: JSON.stringify({ secret, depositId: id })
     });
     const data = await res.json();
-    alert(res.ok ? '↩ ' + data.message : '❌ ' + data.error);
-    loadDeposits();
+    if (res.ok) loadDeposits();
+    else alert('❌ ' + data.error);
   }
 
   async function markSent(id) {
@@ -346,227 +393,19 @@
       body: JSON.stringify({ secret, depositId: id })
     });
     const data = await res.json();
-    alert(res.ok ? '✅ ' + data.message : '❌ ' + data.error);
-    loadDeposits();
-  }
-
-  // Auto-refresh every 15s
-  setInterval(() => { if (secret) loadDeposits(); }, 15000);
-
-  // ---- QUICK DEPOSIT ----
-
-  // Common pets list — edit these to match what you trade most
-  const COMMON_PETS = [
-    'Huge Cat', 'Huge Dog', 'Huge Bunny', 'Huge Dragon', 'Huge Fairy',
-    'Huge Chest Mimic', 'Huge Hell Rock', 'Huge Santa Paws', 'Huge Pixel Cat',
-    'Huge Agni', 'Huge Dominus', 'Huge Hacked Cat'
-  ];
-
-  let rapList = []; // cached RAP data for autocomplete
-  let petRowCount = 0;
-  const petRowData = {}; // rowId -> { name, value, image } or null
-
-  // Load RAP list for autocomplete
-  async function loadRapList() {
-    try {
-      const res = await fetch(`${API}/api/pet-value?name=Huge Cat`); // warm up cache
-    } catch {}
-    // Fetch raw RAP from biggamesapi directly for autocomplete
-    try {
-      const res = await fetch('https://ps99.biggamesapi.io/api/rap');
-      const data = await res.json();
-      rapList = (data.data || []).filter(p => p.configData?.id).map(p => ({
-        name: p.configData.id,
-        value: p.value || 0,
-        image: `https://biggamesapi.io/image/${encodeURIComponent(p.configData.id)}`
-      }));
-    } catch {}
-  }
-  loadRapList();
-
-  // Render common pet quick-add buttons
-  function renderCommonPetBtns() {
-    const wrap = document.getElementById('commonPetBtns');
-    wrap.innerHTML = COMMON_PETS.map(name =>
-      `<button class="common-pet-btn" onclick="quickAddCommonPet('${name.replace(/'/g,"\\'")}')">🐾 ${name}</button>`
-    ).join('');
-  }
-  renderCommonPetBtns();
-
-  // Add a row when clicking a common pet button
-  function quickAddCommonPet(name) {
-    const rowId = addPetRow();
-    const input = document.getElementById(`petInput_${rowId}`);
-    input.value = name;
-    lookupPetRow(rowId);
-  }
-
-  // Add an empty pet input row, returns rowId
-  function addPetRow() {
-    petRowCount++;
-    const rowId = petRowCount;
-    petRowData[rowId] = null;
-    const rows = document.getElementById('petRows');
-    const div = document.createElement('div');
-    div.className = 'pet-row-item';
-    div.id = `petRow_${rowId}`;
-    div.innerHTML = `
-      <div class="autocomplete-wrap">
-        <input type="text" id="petInput_${rowId}" placeholder="Pet name e.g. Huge Cat"
-          oninput="lookupPetRow(${rowId})" onkeyup="acKeyNav(event, ${rowId})" autocomplete="off" />
-        <div class="ac-dropdown" id="acDrop_${rowId}"></div>
-      </div>
-      <div class="pet-row-preview" id="petPreview_${rowId}" style="opacity:0.3">
-        <img id="petPreviewImg_${rowId}" src="" alt="" style="display:none" />
-        <div>
-          <div class="prname" id="petPreviewName_${rowId}" style="color:var(--muted);font-size:0.75rem">Not found</div>
-          <div class="prval" id="petPreviewVal_${rowId}"></div>
-        </div>
-      </div>
-      <button class="pet-row-remove" onclick="removePetRow(${rowId})" title="Remove">✕</button>`;
-    rows.appendChild(div);
-    document.getElementById(`petInput_${rowId}`).focus();
-    return rowId;
-  }
-
-  function removePetRow(rowId) {
-    document.getElementById(`petRow_${rowId}`)?.remove();
-    delete petRowData[rowId];
-  }
-
-  // Lookup timers per row
-  const rowTimers = {};
-
-  function lookupPetRow(rowId) {
-    clearTimeout(rowTimers[rowId]);
-    petRowData[rowId] = null;
-    const input = document.getElementById(`petInput_${rowId}`);
-    const name = input?.value.trim();
-    const drop = document.getElementById(`acDrop_${rowId}`);
-    const preview = document.getElementById(`petPreview_${rowId}`);
-
-    if (!name) {
-      drop.classList.remove('open');
-      if (preview) preview.style.opacity = '0.3';
-      return;
-    }
-
-    // Show autocomplete suggestions immediately from cached RAP list
-    if (rapList.length > 0) {
-      const q = name.toLowerCase();
-      const matches = rapList.filter(p => p.name.toLowerCase().includes(q)).slice(0, 8);
-      if (matches.length > 0) {
-        drop.innerHTML = matches.map(p =>
-          `<div class="ac-item" onmousedown="selectAcItem(${rowId}, '${p.name.replace(/'/g,"\\'")}')">
-            <img src="${p.image}" onerror="this.style.display='none'" alt="" />
-            <span>${p.name}</span>
-            <span style="margin-left:auto;font-size:0.72rem;color:var(--purple-light)">${p.value.toLocaleString()}</span>
-          </div>`
-        ).join('');
-        drop.classList.add('open');
-      } else {
-        drop.classList.remove('open');
-      }
-    }
-
-    // Debounced full lookup for preview
-    rowTimers[rowId] = setTimeout(async () => {
-      try {
-        const res = await fetch(`${API}/api/pet-value?name=${encodeURIComponent(name)}`);
-        const data = await res.json();
-        if (res.ok) {
-          petRowData[rowId] = data;
-          document.getElementById(`petPreviewImg_${rowId}`).src = data.image;
-          document.getElementById(`petPreviewImg_${rowId}`).style.display = 'block';
-          document.getElementById(`petPreviewName_${rowId}`).textContent = data.name;
-          document.getElementById(`petPreviewName_${rowId}`).style.color = 'var(--text)';
-          document.getElementById(`petPreviewVal_${rowId}`).textContent = data.value.toLocaleString() + ' RAP';
-          if (preview) preview.style.opacity = '1';
-          drop.classList.remove('open');
-        } else {
-          petRowData[rowId] = null;
-          document.getElementById(`petPreviewName_${rowId}`).textContent = 'Not found';
-          document.getElementById(`petPreviewName_${rowId}`).style.color = 'var(--red)';
-          document.getElementById(`petPreviewVal_${rowId}`).textContent = '';
-          document.getElementById(`petPreviewImg_${rowId}`).style.display = 'none';
-          if (preview) preview.style.opacity = '0.5';
-        }
-      } catch {}
-    }, 400);
-  }
-
-  function selectAcItem(rowId, name) {
-    const input = document.getElementById(`petInput_${rowId}`);
-    if (input) input.value = name;
-    document.getElementById(`acDrop_${rowId}`)?.classList.remove('open');
-    lookupPetRow(rowId);
-  }
-
-  function acKeyNav(e, rowId) {
-    if (e.key === 'Escape') document.getElementById(`acDrop_${rowId}`)?.classList.remove('open');
+    if (res.ok) loadDeposits();
+    else alert('❌ ' + data.error);
   }
 
   // Close dropdowns on outside click
-  document.addEventListener('click', () => {
-    document.querySelectorAll('.ac-dropdown').forEach(d => d.classList.remove('open'));
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.ac-wrap')) {
+      document.querySelectorAll('.ac-dropdown').forEach(d => d.classList.remove('open'));
+    }
   });
 
-  async function submitQuickDeposit() {
-    const username = document.getElementById('qdUsername').value.trim();
-    const errEl = document.getElementById('qdErr');
-    const okEl = document.getElementById('qdOk');
-    errEl.style.display = 'none';
-    okEl.style.display = 'none';
-
-    if (!username) {
-      errEl.style.display = 'block';
-      errEl.textContent = '❌ Enter a SpinZone username first.';
-      return;
-    }
-
-    const rows = Object.entries(petRowData).filter(([id]) => document.getElementById(`petRow_${id}`));
-    const validRows = rows.filter(([, data]) => data !== null);
-
-    if (validRows.length === 0) {
-      errEl.style.display = 'block';
-      errEl.textContent = '❌ Add at least one valid pet.';
-      return;
-    }
-
-    const results = [];
-    for (const [rowId, petData] of validRows) {
-      try {
-        const res = await fetch(`${API}/api/admin/deposits/create`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ secret, username, petName: petData.name })
-        });
-        const data = await res.json();
-        results.push({ petName: petData.name, ok: res.ok, msg: res.ok ? data.message : data.error });
-        if (res.ok) removePetRow(parseInt(rowId));
-      } catch {
-        results.push({ petName: petData.name, ok: false, msg: 'Could not connect' });
-      }
-    }
-
-    const succeeded = results.filter(r => r.ok);
-    const failed = results.filter(r => !r.ok);
-
-    if (succeeded.length > 0) {
-      okEl.style.display = 'block';
-      okEl.textContent = `✅ Confirmed ${succeeded.length} deposit(s) for ${username}: ${succeeded.map(r => r.petName).join(', ')}`;
-      document.getElementById('qdUsername').value = '';
-    }
-    if (failed.length > 0) {
-      errEl.style.display = 'block';
-      errEl.textContent = `❌ Failed: ${failed.map(r => `${r.petName} — ${r.msg}`).join(' | ')}`;
-    }
-
-    loadDeposits();
-  }
-
-  // Start with one empty row
-  addPetRow();
+  // Auto-refresh every 10s
+  setInterval(() => { if (secret) loadDeposits(); }, 10000);
 </script>
 </body>
 </html>
