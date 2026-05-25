@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SpinZone — Middleman Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07070f; --surface: #0e0e1c; --surface2: #141428; --border: #1e1e3a;
+      --purple: #9333ea; --purple-light: #c084fc; --green: #4ade80; --red: #f87171;
+      --yellow: #fbbf24; --text: #f0f0ff; --muted: #6b6b8a;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+    nav { display:flex; justify-content:space-between; align-items:center; padding:1rem 2rem; background:var(--surface); border-bottom:1px solid var(--border); }
+    .logo { font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:900; color:var(--purple-light); }
+    .admin-badge { background:rgba(147,51,234,0.2); border:1px solid var(--purple); color:var(--purple-light); padding:0.3rem 0.8rem; border-radius:99px; font-size:0.78rem; }
+
+    /* LOGIN */
+    .login-wrap { display:flex; justify-content:center; align-items:center; min-height:calc(100vh - 60px); padding:2rem; }
+    .login-box { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:2.5rem; width:100%; max-width:380px; text-align:center; }
+    .login-box h2 { font-family:'Syne',sans-serif; font-size:1.5rem; font-weight:800; margin-bottom:0.5rem; }
+    .login-box p { color:var(--muted); font-size:0.88rem; margin-bottom:1.5rem; }
+    .field { margin-bottom:1rem; text-align:left; }
+    .field label { display:block; font-size:0.8rem; color:var(--muted); margin-bottom:0.4rem; }
+    .field input { width:100%; padding:0.7rem 1rem; background:var(--surface2); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:0.95rem; font-family:'DM Sans',sans-serif; outline:none; }
+    .field input:focus { border-color:var(--purple); }
+    .btn { padding:0.65rem 1.4rem; border-radius:10px; border:none; cursor:pointer; font-size:0.9rem; font-family:'DM Sans',sans-serif; font-weight:600; transition:all 0.2s; }
+    .btn-purple { background:var(--purple); color:white; width:100%; }
+    .btn-purple:hover { background:#7c22d3; }
+    .btn-green { background:rgba(74,222,128,0.15); color:var(--green); border:1px solid rgba(74,222,128,0.4); font-size:0.82rem; padding:0.4rem 0.9rem; }
+    .btn-green:hover { background:rgba(74,222,128,0.25); }
+    .btn-yellow { background:rgba(251,191,36,0.15); color:var(--yellow); border:1px solid rgba(251,191,36,0.4); font-size:0.82rem; padding:0.4rem 0.9rem; }
+    .btn-red { background:rgba(248,113,113,0.1); color:var(--red); border:1px solid rgba(248,113,113,0.3); font-size:0.82rem; padding:0.4rem 0.9rem; }
+    .err { background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); color:var(--red); padding:0.7rem; border-radius:8px; font-size:0.85rem; margin-bottom:1rem; display:none; }
+
+    /* DASHBOARD */
+    #dashboard { display:none; }
+    .dash-header { padding:1.5rem 2rem; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+    .dash-header h1 { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:800; }
+    .refresh-btn { background:var(--surface2); border:1px solid var(--border); color:var(--muted); padding:0.4rem 1rem; border-radius:8px; cursor:pointer; font-size:0.85rem; }
+    .refresh-btn:hover { color:var(--text); border-color:var(--purple); }
+
+    .dash-body { max-width:1200px; margin:0 auto; padding:2rem; }
+    .section-title { font-family:'Syne',sans-serif; font-size:1rem; font-weight:700; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem; }
+    .count-badge { background:var(--surface2); border:1px solid var(--border); border-radius:99px; padding:0.15rem 0.6rem; font-size:0.75rem; color:var(--muted); }
+
+    .deposit-table { width:100%; border-collapse:collapse; margin-bottom:2.5rem; }
+    .deposit-table th { text-align:left; font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; color:var(--muted); padding:0.6rem 1rem; border-bottom:1px solid var(--border); }
+    .deposit-table td { padding:0.85rem 1rem; border-bottom:1px solid var(--border); font-size:0.88rem; vertical-align:middle; }
+    .deposit-table tr:hover td { background:rgba(255,255,255,0.02); }
+    .pet-cell { display:flex; align-items:center; gap:0.8rem; }
+    .pet-cell img { width:44px; height:44px; object-fit:contain; border-radius:8px; background:var(--surface2); }
+    .pet-cell .pname { font-weight:600; font-size:0.88rem; }
+    .pet-cell .pval { font-size:0.75rem; color:var(--purple-light); margin-top:0.15rem; }
+    .status-pill { display:inline-block; padding:0.2rem 0.65rem; border-radius:99px; font-size:0.72rem; font-weight:500; }
+    .sp-pending { background:rgba(251,191,36,0.15); color:var(--yellow); border:1px solid rgba(251,191,36,0.3); }
+    .sp-confirmed { background:rgba(74,222,128,0.1); color:var(--green); border:1px solid rgba(74,222,128,0.3); }
+    .sp-in_flip { background:rgba(147,51,234,0.15); color:var(--purple-light); border:1px solid rgba(147,51,234,0.3); }
+    .sp-won { background:rgba(74,222,128,0.15); color:var(--green); border:1px solid rgba(74,222,128,0.4); }
+    .sp-returned { background:rgba(107,107,138,0.15); color:var(--muted); border:1px solid var(--border); }
+    .sp-sent { background:rgba(107,107,138,0.1); color:var(--muted); border:1px solid var(--border); }
+    .action-btns { display:flex; gap:0.5rem; flex-wrap:wrap; }
+    .time-ago { font-size:0.75rem; color:var(--muted); }
+    /* QUICK DEPOSIT */
+    .quick-deposit-wrap { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:1.5rem; margin-bottom:2rem; }
+    .quick-deposit-wrap h2 { font-family:'Syne',sans-serif; font-size:1rem; font-weight:800; margin-bottom:0.4rem; color:var(--green); }
+    .quick-deposit-wrap > p { font-size:0.83rem; color:var(--muted); margin-bottom:1rem; line-height:1.5; }
+    .qd-username-row { display:flex; gap:0.75rem; align-items:flex-end; margin-bottom:1rem; }
+    .qf { flex:1; }
+    .qf label { display:block; font-size:0.75rem; color:var(--muted); margin-bottom:0.35rem; text-transform:uppercase; letter-spacing:0.5px; }
+    .qf input { width:100%; padding:0.65rem 0.9rem; background:var(--surface2); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:0.9rem; font-family:'DM Sans',sans-serif; outline:none; }
+    .qf input:focus { border-color:var(--green); }
+    .common-pets-label { font-size:0.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.5rem; }
+    .common-pets { display:flex; flex-wrap:wrap; gap:0.4rem; margin-bottom:1rem; }
+    .common-pet-btn { background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:0.3rem 0.75rem; border-radius:99px; font-size:0.78rem; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s; white-space:nowrap; }
+    .common-pet-btn:hover { border-color:var(--green); color:var(--green); }
+    .pet-rows { display:flex; flex-direction:column; gap:0.5rem; margin-bottom:0.75rem; }
+    .pet-row-item { display:flex; gap:0.6rem; align-items:center; background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:0.5rem 0.75rem; }
+    .pet-row-item .autocomplete-wrap { flex:1; position:relative; }
+    .pet-row-item input { width:100%; padding:0.5rem 0.75rem; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:0.88rem; font-family:'DM Sans',sans-serif; outline:none; }
+    .pet-row-item input:focus { border-color:var(--green); }
+    .pet-row-preview { display:flex; align-items:center; gap:0.5rem; min-width:150px; }
+    .pet-row-preview img { width:32px; height:32px; object-fit:contain; border-radius:5px; background:var(--bg); }
+    .pet-row-preview .prname { font-size:0.78rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80px; }
+    .pet-row-preview .prval { font-size:0.7rem; color:var(--purple-light); }
+    .pet-row-remove { background:none; border:none; color:var(--muted); font-size:1rem; cursor:pointer; padding:0.2rem 0.4rem; border-radius:4px; flex-shrink:0; }
+    .pet-row-remove:hover { color:var(--red); }
+    .ac-dropdown { position:absolute; top:calc(100% + 4px); left:0; right:0; background:var(--surface); border:1px solid var(--border); border-radius:8px; z-index:50; max-height:160px; overflow-y:auto; display:none; box-shadow:0 8px 24px rgba(0,0,0,0.4); }
+    .ac-dropdown.open { display:block; }
+    .ac-item { padding:0.5rem 0.75rem; font-size:0.83rem; cursor:pointer; display:flex; align-items:center; gap:0.6rem; }
+    .ac-item:hover { background:rgba(147,51,234,0.15); }
+    .ac-item img { width:28px; height:28px; object-fit:contain; border-radius:4px; background:var(--surface2); }
+    .qd-actions { display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center; }
+    .btn-add-pet { background:var(--surface2); border:1px solid var(--border); color:var(--muted); padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-size:0.82rem; font-family:'DM Sans',sans-serif; transition:all 0.2s; }
+    .btn-add-pet:hover { border-color:var(--purple); color:var(--purple-light); }
+    .qs-err { background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); color:var(--red); padding:0.6rem 0.9rem; border-radius:8px; font-size:0.83rem; margin-top:0.75rem; display:none; }
+    .qs-ok { background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.3); color:var(--green); padding:0.6rem 0.9rem; border-radius:8px; font-size:0.83rem; margin-top:0.75rem; display:none; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">⚡ SpinZone — Middleman</div>
+  <span class="admin-badge">🔒 Admin Panel</span>
+</nav>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-box">
+    <h2>🔐 Middleman Login</h2>
+    <p>Enter the middleman password to access the dashboard.</p>
+    <div class="err" id="loginErr"></div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="mmPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()" />
+    </div>
+    <button class="btn btn-purple" onclick="login()">Login</button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="dash-header">
+    <h1>Deposit Dashboard</h1>
+    <button class="refresh-btn" onclick="loadDeposits()">↻ Refresh</button>
+  </div>
+  <div class="dash-body">
+
+    <!-- QUICK DEPOSIT CREATOR -->
+    <div class="quick-deposit-wrap">
+      <h2>⚡ Create Deposit from Trade</h2>
+      <p>Player traded you pets in PS99? Enter their SpinZone username, add each pet, then hit Confirm All.</p>
+
+      <!-- Username -->
+      <div class="qd-username-row">
+        <div class="qf">
+          <label>SpinZone Username</label>
+          <input type="text" id="qdUsername" placeholder="e.g. killerpro123" />
+        </div>
+      </div>
+
+      <!-- Common pet quick-add buttons -->
+      <div class="common-pets-label">⚡ Quick Add Common Pets</div>
+      <div class="common-pets" id="commonPetBtns"></div>
+
+      <!-- Pet rows -->
+      <div class="pet-rows" id="petRows"></div>
+
+      <!-- Actions -->
+      <div class="qd-actions">
+        <button class="btn-add-pet" onclick="addPetRow()">+ Add Pet</button>
+        <button class="btn btn-green" style="padding:0.6rem 1.4rem" onclick="submitQuickDeposit()">✓ Confirm All Deposits</button>
+      </div>
+
+      <div class="qs-err" id="qdErr"></div>
+      <div class="qs-ok" id="qdOk"></div>
+    </div>
+
+    <!-- PENDING -->
+    <div class="section-title">⏳ Pending Deposits <span class="count-badge" id="pendingCount">0</span></div>
+    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">These players have submitted a deposit request. Once they trade the pet to you in PS99, click <strong style="color:var(--green)">Confirm</strong>.</p>
+    <table class="deposit-table" id="pendingTable">
+      <thead><tr><th>Pet</th><th>Player</th><th>Requested</th><th>Actions</th></tr></thead>
+      <tbody id="pendingBody"><tr class="empty-row"><td colspan="4">No pending deposits</td></tr></tbody>
+    </table>
+
+    <!-- CONFIRMED / IN FLIP -->
+    <div class="section-title">✅ Confirmed &amp; Active <span class="count-badge" id="activeCount">0</span></div>
+    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">These pets are confirmed and may be in a flip. No action needed unless returning.</p>
+    <table class="deposit-table" id="activeTable">
+      <thead><tr><th>Pet</th><th>Player</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody id="activeBody"><tr class="empty-row"><td colspan="4">None</td></tr></tbody>
+    </table>
+
+    <!-- WON — needs sending -->
+    <div class="section-title">🏆 Won — Needs Sending <span class="count-badge" id="wonCount">0</span></div>
+    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">These players won a flip. Trade the pet to them in PS99, then click <strong style="color:var(--green)">Mark Sent</strong>.</p>
+    <table class="deposit-table" id="wonTable">
+      <thead><tr><th>Pet</th><th>Send To</th><th>Won At</th><th>Actions</th></tr></thead>
+      <tbody id="wonBody"><tr class="empty-row"><td colspan="4">No pending payouts</td></tr></tbody>
+    </table>
+
+    <!-- HISTORY -->
+    <div class="section-title">📋 Recent History</div>
+    <table class="deposit-table" id="historyTable">
+      <thead><tr><th>Pet</th><th>Player</th><th>Status</th><th>Time</th></tr></thead>
+      <tbody id="historyBody"><tr class="empty-row"><td colspan="4">No history yet</td></tr></tbody>
+    </table>
+
+  </div>
+</div>
+
+<script>
+  const API = 'http://localhost:3000';
+  let secret = '';
+
+  function login() {
+    const pw = document.getElementById('mmPassword').value;
+    if (!pw) return;
+    secret = pw;
+    loadDeposits();
+  }
+
+  function timeAgo(ts) {
+    const s = Math.floor((Date.now() - ts) / 1000);
+    if (s < 60) return `${s}s ago`;
+    if (s < 3600) return `${Math.floor(s/60)}m ago`;
+    if (s < 86400) return `${Math.floor(s/3600)}h ago`;
+    return `${Math.floor(s/86400)}d ago`;
+  }
+
+  async function loadDeposits() {
+    try {
+      const res = await fetch(`${API}/api/admin/deposits`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ secret })
+      });
+      if (res.status === 403) {
+        const err = document.getElementById('loginErr');
+        err.style.display = 'block'; err.textContent = '❌ Wrong password';
+        return;
+      }
+      const deposits = await res.json();
+      document.getElementById('loginWrap').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      renderDeposits(deposits);
+    } catch {
+      const err = document.getElementById('loginErr');
+      err.style.display = 'block'; err.textContent = '❌ Could not connect to server';
+    }
+  }
+
+  function renderDeposits(deposits) {
+    const pending = deposits.filter(d => d.status === 'pending');
+    const active = deposits.filter(d => d.status === 'confirmed' || d.status === 'in_flip');
+    const won = deposits.filter(d => d.status === 'won');
+    const history = deposits.filter(d => d.status === 'returned' || d.status === 'sent').slice(-20).reverse();
+
+    document.getElementById('pendingCount').textContent = pending.length;
+    document.getElementById('activeCount').textContent = active.length;
+    document.getElementById('wonCount').textContent = won.length;
+
+    renderPending(pending);
+    renderActive(active);
+    renderWon(won);
+    renderHistory(history);
+  }
+
+  function petCell(d) {
+    return `<div class="pet-cell">
+      <img src="${d.petImage}" onerror="this.style.display='none'" alt="" />
+      <div><div class="pname">${d.petName}</div><div class="pval">${d.petValue.toLocaleString()} RAP</div></div>
+    </div>`;
+  }
+
+  function renderPending(deposits) {
+    const tbody = document.getElementById('pendingBody');
+    if (deposits.length === 0) { tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No pending deposits 🎉</td></tr>'; return; }
+    tbody.innerHTML = deposits.map(d => `
+      <tr>
+        <td>${petCell(d)}</td>
+        <td><strong>@${d.username}</strong></td>
+        <td><span class="time-ago">${timeAgo(d.createdAt)}</span></td>
+        <td>
+          <div class="action-btns">
+            <button class="btn btn-green" onclick="confirmDeposit('${d.id}')">✓ Confirm Received</button>
+            <button class="btn btn-red" onclick="returnDeposit('${d.id}')">✗ Reject</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  function renderActive(deposits) {
+    const tbody = document.getElementById('activeBody');
+    if (deposits.length === 0) { tbody.innerHTML = '<tr class="empty-row"><td colspan="4">None active</td></tr>'; return; }
+    tbody.innerHTML = deposits.map(d => `
+      <tr>
+        <td>${petCell(d)}</td>
+        <td><strong>@${d.username}</strong></td>
+        <td><span class="status-pill sp-${d.status}">${d.status === 'in_flip' ? '🪙 In Flip' : '✅ Confirmed'}</span></td>
+        <td>
+          <div class="action-btns">
+            <button class="btn btn-red" onclick="returnDeposit('${d.id}')">↩ Return</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  function renderWon(deposits) {
+    const tbody = document.getElementById('wonBody');
+    if (deposits.length === 0) { tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No pending payouts 🎉</td></tr>'; return; }
+    tbody.innerHTML = deposits.map(d => `
+      <tr>
+        <td>${petCell(d)}</td>
+        <td><strong style="color:var(--green)">@${d.username}</strong></td>
+        <td><span class="time-ago">${timeAgo(d.createdAt)}</span></td>
+        <td>
+          <div class="action-btns">
+            <button class="btn btn-green" onclick="markSent('${d.id}')">✓ Sent to Winner</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  function renderHistory(deposits) {
+    const tbody = document.getElementById('historyBody');
+    if (deposits.length === 0) { tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No history yet</td></tr>'; return; }
+    tbody.innerHTML = deposits.map(d => `
+      <tr>
+        <td>${petCell(d)}</td>
+        <td>@${d.username}</td>
+        <td><span class="status-pill sp-${d.status}">${d.status}</span></td>
+        <td><span class="time-ago">${timeAgo(d.createdAt)}</span></td>
+      </tr>`).join('');
+  }
+
+  async function confirmDeposit(id) {
+    const res = await fetch(`${API}/api/admin/deposits/confirm`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret, depositId: id })
+    });
+    const data = await res.json();
+    alert(res.ok ? '✅ ' + data.message : '❌ ' + data.error);
+    loadDeposits();
+  }
+
+  async function returnDeposit(id) {
+    if (!confirm('Mark this deposit as returned?')) return;
+    const res = await fetch(`${API}/api/admin/deposits/return`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret, depositId: id })
+    });
+    const data = await res.json();
+    alert(res.ok ? '↩ ' + data.message : '❌ ' + data.error);
+    loadDeposits();
+  }
+
+  async function markSent(id) {
+    const res = await fetch(`${API}/api/admin/deposits/sent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret, depositId: id })
+    });
+    const data = await res.json();
+    alert(res.ok ? '✅ ' + data.message : '❌ ' + data.error);
+    loadDeposits();
+  }
+
+  // Auto-refresh every 15s
+  setInterval(() => { if (secret) loadDeposits(); }, 15000);
+
+  // ---- QUICK DEPOSIT ----
+
+  // Common pets list — edit these to match what you trade most
+  const COMMON_PETS = [
+    'Huge Cat', 'Huge Dog', 'Huge Bunny', 'Huge Dragon', 'Huge Fairy',
+    'Huge Chest Mimic', 'Huge Hell Rock', 'Huge Santa Paws', 'Huge Pixel Cat',
+    'Huge Agni', 'Huge Dominus', 'Huge Hacked Cat'
+  ];
+
+  let rapList = []; // cached RAP data for autocomplete
+  let petRowCount = 0;
+  const petRowData = {}; // rowId -> { name, value, image } or null
+
+  // Load RAP list for autocomplete
+  async function loadRapList() {
+    try {
+      const res = await fetch(`${API}/api/pet-value?name=Huge Cat`); // warm up cache
+    } catch {}
+    // Fetch raw RAP from biggamesapi directly for autocomplete
+    try {
+      const res = await fetch('https://ps99.biggamesapi.io/api/rap');
+      const data = await res.json();
+      rapList = (data.data || []).filter(p => p.configData?.id).map(p => ({
+        name: p.configData.id,
+        value: p.value || 0,
+        image: `https://biggamesapi.io/image/${encodeURIComponent(p.configData.id)}`
+      }));
+    } catch {}
+  }
+  loadRapList();
+
+  // Render common pet quick-add buttons
+  function renderCommonPetBtns() {
+    const wrap = document.getElementById('commonPetBtns');
+    wrap.innerHTML = COMMON_PETS.map(name =>
+      `<button class="common-pet-btn" onclick="quickAddCommonPet('${name.replace(/'/g,"\\'")}')">🐾 ${name}</button>`
+    ).join('');
+  }
+  renderCommonPetBtns();
+
+  // Add a row when clicking a common pet button
+  function quickAddCommonPet(name) {
+    const rowId = addPetRow();
+    const input = document.getElementById(`petInput_${rowId}`);
+    input.value = name;
+    lookupPetRow(rowId);
+  }
+
+  // Add an empty pet input row, returns rowId
+  function addPetRow() {
+    petRowCount++;
+    const rowId = petRowCount;
+    petRowData[rowId] = null;
+    const rows = document.getElementById('petRows');
+    const div = document.createElement('div');
+    div.className = 'pet-row-item';
+    div.id = `petRow_${rowId}`;
+    div.innerHTML = `
+      <div class="autocomplete-wrap">
+        <input type="text" id="petInput_${rowId}" placeholder="Pet name e.g. Huge Cat"
+          oninput="lookupPetRow(${rowId})" onkeyup="acKeyNav(event, ${rowId})" autocomplete="off" />
+        <div class="ac-dropdown" id="acDrop_${rowId}"></div>
+      </div>
+      <div class="pet-row-preview" id="petPreview_${rowId}" style="opacity:0.3">
+        <img id="petPreviewImg_${rowId}" src="" alt="" style="display:none" />
+        <div>
+          <div class="prname" id="petPreviewName_${rowId}" style="color:var(--muted);font-size:0.75rem">Not found</div>
+          <div class="prval" id="petPreviewVal_${rowId}"></div>
+        </div>
+      </div>
+      <button class="pet-row-remove" onclick="removePetRow(${rowId})" title="Remove">✕</button>`;
+    rows.appendChild(div);
+    document.getElementById(`petInput_${rowId}`).focus();
+    return rowId;
+  }
+
+  function removePetRow(rowId) {
+    document.getElementById(`petRow_${rowId}`)?.remove();
+    delete petRowData[rowId];
+  }
+
+  // Lookup timers per row
+  const rowTimers = {};
+
+  function lookupPetRow(rowId) {
+    clearTimeout(rowTimers[rowId]);
+    petRowData[rowId] = null;
+    const input = document.getElementById(`petInput_${rowId}`);
+    const name = input?.value.trim();
+    const drop = document.getElementById(`acDrop_${rowId}`);
+    const preview = document.getElementById(`petPreview_${rowId}`);
+
+    if (!name) {
+      drop.classList.remove('open');
+      if (preview) preview.style.opacity = '0.3';
+      return;
+    }
+
+    // Show autocomplete suggestions immediately from cached RAP list
+    if (rapList.length > 0) {
+      const q = name.toLowerCase();
+      const matches = rapList.filter(p => p.name.toLowerCase().includes(q)).slice(0, 8);
+      if (matches.length > 0) {
+        drop.innerHTML = matches.map(p =>
+          `<div class="ac-item" onmousedown="selectAcItem(${rowId}, '${p.name.replace(/'/g,"\\'")}')">
+            <img src="${p.image}" onerror="this.style.display='none'" alt="" />
+            <span>${p.name}</span>
+            <span style="margin-left:auto;font-size:0.72rem;color:var(--purple-light)">${p.value.toLocaleString()}</span>
+          </div>`
+        ).join('');
+        drop.classList.add('open');
+      } else {
+        drop.classList.remove('open');
+      }
+    }
+
+    // Debounced full lookup for preview
+    rowTimers[rowId] = setTimeout(async () => {
+      try {
+        const res = await fetch(`${API}/api/pet-value?name=${encodeURIComponent(name)}`);
+        const data = await res.json();
+        if (res.ok) {
+          petRowData[rowId] = data;
+          document.getElementById(`petPreviewImg_${rowId}`).src = data.image;
+          document.getElementById(`petPreviewImg_${rowId}`).style.display = 'block';
+          document.getElementById(`petPreviewName_${rowId}`).textContent = data.name;
+          document.getElementById(`petPreviewName_${rowId}`).style.color = 'var(--text)';
+          document.getElementById(`petPreviewVal_${rowId}`).textContent = data.value.toLocaleString() + ' RAP';
+          if (preview) preview.style.opacity = '1';
+          drop.classList.remove('open');
+        } else {
+          petRowData[rowId] = null;
+          document.getElementById(`petPreviewName_${rowId}`).textContent = 'Not found';
+          document.getElementById(`petPreviewName_${rowId}`).style.color = 'var(--red)';
+          document.getElementById(`petPreviewVal_${rowId}`).textContent = '';
+          document.getElementById(`petPreviewImg_${rowId}`).style.display = 'none';
+          if (preview) preview.style.opacity = '0.5';
+        }
+      } catch {}
+    }, 400);
+  }
+
+  function selectAcItem(rowId, name) {
+    const input = document.getElementById(`petInput_${rowId}`);
+    if (input) input.value = name;
+    document.getElementById(`acDrop_${rowId}`)?.classList.remove('open');
+    lookupPetRow(rowId);
+  }
+
+  function acKeyNav(e, rowId) {
+    if (e.key === 'Escape') document.getElementById(`acDrop_${rowId}`)?.classList.remove('open');
+  }
+
+  // Close dropdowns on outside click
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.ac-dropdown').forEach(d => d.classList.remove('open'));
+  });
+
+  async function submitQuickDeposit() {
+    const username = document.getElementById('qdUsername').value.trim();
+    const errEl = document.getElementById('qdErr');
+    const okEl = document.getElementById('qdOk');
+    errEl.style.display = 'none';
+    okEl.style.display = 'none';
+
+    if (!username) {
+      errEl.style.display = 'block';
+      errEl.textContent = '❌ Enter a SpinZone username first.';
+      return;
+    }
+
+    const rows = Object.entries(petRowData).filter(([id]) => document.getElementById(`petRow_${id}`));
+    const validRows = rows.filter(([, data]) => data !== null);
+
+    if (validRows.length === 0) {
+      errEl.style.display = 'block';
+      errEl.textContent = '❌ Add at least one valid pet.';
+      return;
+    }
+
+    const results = [];
+    for (const [rowId, petData] of validRows) {
+      try {
+        const res = await fetch(`${API}/api/admin/deposits/create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ secret, username, petName: petData.name })
+        });
+        const data = await res.json();
+        results.push({ petName: petData.name, ok: res.ok, msg: res.ok ? data.message : data.error });
+        if (res.ok) removePetRow(parseInt(rowId));
+      } catch {
+        results.push({ petName: petData.name, ok: false, msg: 'Could not connect' });
+      }
+    }
+
+    const succeeded = results.filter(r => r.ok);
+    const failed = results.filter(r => !r.ok);
+
+    if (succeeded.length > 0) {
+      okEl.style.display = 'block';
+      okEl.textContent = `✅ Confirmed ${succeeded.length} deposit(s) for ${username}: ${succeeded.map(r => r.petName).join(', ')}`;
+      document.getElementById('qdUsername').value = '';
+    }
+    if (failed.length > 0) {
+      errEl.style.display = 'block';
+      errEl.textContent = `❌ Failed: ${failed.map(r => `${r.petName} — ${r.msg}`).join(' | ')}`;
+    }
+
+    loadDeposits();
+  }
+
+  // Start with one empty row
+  addPetRow();
+</script>
+</body>
+</html>

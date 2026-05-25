@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SpinZone - PS99 Coin Flips</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07070f;
+      --surface: #0e0e1c;
+      --surface2: #141428;
+      --border: #1e1e3a;
+      --purple: #9333ea;
+      --purple-light: #c084fc;
+      --pink: #ec4899;
+      --green: #4ade80;
+      --red: #f87171;
+      --text: #f0f0ff;
+      --muted: #6b6b8a;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* NAV */
+    nav {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2rem; background: var(--surface);
+      border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50;
+    }
+    .logo { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 900; color: var(--purple-light); text-decoration: none; letter-spacing: 2px; }
+    .logo span { color: var(--pink); }
+    .nav-right { display: flex; gap: 1rem; align-items: center; }
+    .nav-right a { color: var(--muted); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+    .nav-right a:hover { color: var(--text); }
+    .btn { padding: 0.5rem 1.2rem; border-radius: 8px; border: none; cursor: pointer; font-size: 0.9rem; font-family: 'DM Sans', sans-serif; font-weight: 500; transition: all 0.2s; text-decoration: none; display: inline-block; }
+    .btn-purple { background: var(--purple); color: white; }
+    .btn-purple:hover { background: #7c22d3; }
+    .btn-outline { background: transparent; color: var(--purple-light); border: 1px solid var(--purple); }
+    .btn-outline:hover { background: rgba(147,51,234,0.15); }
+    .btn-green { background: rgba(74,222,128,0.15); color: var(--green); border: 1px solid var(--green); }
+    .btn-red { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid var(--red); font-size: 0.8rem; padding: 0.35rem 0.8rem; }
+
+    /* HERO */
+    .hero {
+      text-align: center; padding: 5rem 2rem 3rem;
+      background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(147,51,234,0.25) 0%, transparent 70%);
+    }
+    .hero-tag { display: inline-block; background: rgba(147,51,234,0.15); border: 1px solid rgba(147,51,234,0.4); color: var(--purple-light); padding: 0.3rem 1rem; border-radius: 99px; font-size: 0.8rem; margin-bottom: 1.5rem; letter-spacing: 1px; text-transform: uppercase; }
+    .hero h1 { font-family: 'Syne', sans-serif; font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 900; line-height: 1.05; margin-bottom: 1.2rem; }
+    .hero h1 .grad { background: linear-gradient(135deg, var(--purple-light), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { color: var(--muted); font-size: 1.05rem; max-width: 500px; margin: 0 auto 2rem; line-height: 1.6; }
+    .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    /* STATS */
+    .stats { display: flex; justify-content: center; gap: 4rem; padding: 1.5rem 2rem; background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+    .stat { text-align: center; }
+    .stat-num { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; color: var(--purple-light); }
+    .stat-lbl { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 0.2rem; }
+
+    /* TABS */
+    .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 2rem; max-width: 1200px; margin: 2rem auto 0; }
+    .tab { padding: 0.75rem 1.5rem; font-size: 0.9rem; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .tab.active { color: var(--purple-light); border-bottom-color: var(--purple); }
+    .tab:hover:not(.active) { color: var(--text); }
+
+    /* SECTION */
+    .section { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+    .section-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .section-head h2 { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; }
+    .live-dot { display: inline-block; width: 8px; height: 8px; background: var(--green); border-radius: 50%; margin-right: 0.5rem; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    /* DEPOSIT GRID */
+    .deposit-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; }
+    .deposit-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      padding: 1.2rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative;
+    }
+    .deposit-card:hover { border-color: var(--purple); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(147,51,234,0.2); }
+    .deposit-card.mine { border-color: rgba(147,51,234,0.5); }
+    .deposit-card.mine:hover { border-color: var(--purple-light); }
+    .deposit-card.pending-card { opacity: 0.55; cursor: default; }
+    .deposit-card.pending-card:hover { transform: none; border-color: var(--border); }
+    .pet-img { width: 90px; height: 90px; object-fit: contain; margin: 0 auto 0.8rem; display: block; border-radius: 8px; background: var(--surface2); }
+    .pet-img-placeholder { width: 90px; height: 90px; background: var(--surface2); border-radius: 8px; margin: 0 auto 0.8rem; display: flex; align-items: center; justify-content: center; font-size: 2rem; }
+    .deposit-pet-name { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .deposit-value { font-size: 0.78rem; color: var(--purple-light); margin-bottom: 0.3rem; }
+    .deposit-user { font-size: 0.72rem; color: var(--muted); }
+    .deposit-status-badge {
+      position: absolute; top: 0.6rem; right: 0.6rem;
+      font-size: 0.65rem; padding: 0.15rem 0.5rem; border-radius: 99px;
+    }
+    .badge-pending { background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.4); }
+    .badge-confirmed { background: rgba(74,222,128,0.1); color: var(--green); border: 1px solid rgba(74,222,128,0.3); }
+    .mine-tag { position: absolute; top: 0.6rem; left: 0.6rem; font-size: 0.65rem; padding: 0.15rem 0.5rem; border-radius: 99px; background: rgba(147,51,234,0.2); color: var(--purple-light); border: 1px solid rgba(147,51,234,0.4); }
+
+    /* FLIP GRID */
+    .flip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
+    .flip-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      padding: 1.5rem; transition: border-color 0.2s;
+    }
+    .flip-card.done { border-color: rgba(74,222,128,0.4); }
+    .flip-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; }
+    .flip-top span { font-size: 0.8rem; color: var(--muted); }
+    .badge { padding: 0.2rem 0.6rem; border-radius: 99px; font-size: 0.72rem; }
+    .badge-live { background: rgba(74,222,128,0.1); color: var(--green); border: 1px solid rgba(74,222,128,0.3); }
+    .badge-done { background: rgba(147,51,234,0.15); color: var(--purple-light); border: 1px solid rgba(147,51,234,0.3); }
+    .vs-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.2rem; }
+    .flip-side { flex: 1; background: var(--surface2); border-radius: 12px; padding: 1rem; text-align: center; }
+    .flip-side img { width: 64px; height: 64px; object-fit: contain; margin: 0 auto 0.5rem; display: block; border-radius: 6px; background: var(--surface); }
+    .flip-side-name { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .flip-side-val { font-size: 0.72rem; color: var(--purple-light); margin-top: 0.2rem; }
+    .flip-side-user { font-size: 0.7rem; color: var(--muted); margin-top: 0.2rem; }
+    .flip-empty { flex: 1; background: var(--surface2); border-radius: 12px; padding: 1rem; text-align: center; border: 2px dashed var(--border); color: var(--muted); font-size: 0.8rem; }
+    .vs-label { font-family: 'Syne', sans-serif; font-weight: 900; font-size: 1.1rem; color: var(--pink); flex-shrink: 0; }
+    .winner-bar { text-align: center; padding: 0.6rem; border-radius: 8px; background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.3); color: var(--green); font-size: 0.9rem; font-weight: 600; }
+    .flip-btn { width: 100%; padding: 0.65rem; border-radius: 8px; border: none; cursor: pointer; font-size: 0.9rem; font-family: 'DM Sans', sans-serif; font-weight: 600; transition: all 0.2s; }
+    .flip-btn-join { background: var(--purple); color: white; }
+    .flip-btn-join:hover { background: #7c22d3; }
+    .flip-btn-cancel { background: transparent; color: var(--red); border: 1px solid var(--red); }
+    .flip-btn-cancel:hover { background: rgba(248,113,113,0.1); }
+
+    /* EMPTY STATE */
+    .empty { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+    .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.4; }
+    .empty p { font-size: 0.95rem; line-height: 1.6; }
+
+    /* MY DEPOSITS PANEL */
+    .my-deposits-bar {
+      background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem; display: none;
+    }
+    .my-deposits-bar.visible { display: block; }
+    .my-deposits-inner { max-width: 1200px; margin: 0 auto; }
+    .my-deposits-inner h3 { font-family: 'Syne', sans-serif; font-size: 0.95rem; margin-bottom: 0.8rem; color: var(--purple-light); }
+    .my-deposit-list { display: flex; gap: 0.8rem; flex-wrap: wrap; }
+    .my-deposit-item {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+      padding: 0.6rem 1rem; display: flex; align-items: center; gap: 0.7rem; font-size: 0.85rem;
+    }
+    .my-deposit-item img { width: 36px; height: 36px; object-fit: contain; border-radius: 4px; }
+    .my-deposit-info .name { font-weight: 600; font-size: 0.82rem; }
+    .my-deposit-info .val { font-size: 0.72rem; color: var(--purple-light); }
+    .my-deposit-info .st { font-size: 0.7rem; margin-top: 0.1rem; }
+    .st-pending { color: #fbbf24; }
+    .st-confirmed { color: var(--green); }
+    .st-in_flip { color: var(--purple-light); }
+    .st-won { color: var(--green); }
+    .st-returned { color: var(--muted); }
+    .st-sent { color: var(--muted); }
+
+    /* MODALS */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; padding: 1rem; }
+    .overlay.active { display: flex; }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 2rem; width: 100%; max-width: 460px; position: relative; }
+    .modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--muted); font-size: 1.2rem; cursor: pointer; }
+    .modal-close:hover { color: var(--text); }
+    .modal h2 { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; margin-bottom: 0.4rem; }
+    .modal-sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 1.5rem; line-height: 1.5; }
+    .field { margin-bottom: 1rem; }
+    .field label { display: block; font-size: 0.82rem; color: var(--muted); margin-bottom: 0.4rem; }
+    .field input { width: 100%; padding: 0.7rem 1rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 0.95rem; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s; }
+    .field input:focus { border-color: var(--purple); }
+    .field-hint { font-size: 0.8rem; color: var(--purple-light); margin-top: 0.3rem; min-height: 1.1rem; }
+    .err { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3); color: var(--red); padding: 0.7rem 1rem; border-radius: 10px; font-size: 0.85rem; margin-bottom: 1rem; display: none; }
+
+    /* DEPOSIT INSTRUCTIONS BOX */
+    .instructions-box {
+      background: rgba(147,51,234,0.1); border: 1px solid rgba(147,51,234,0.3);
+      border-radius: 12px; padding: 1.2rem; margin-bottom: 1.2rem;
+    }
+    .instructions-box .step { display: flex; gap: 0.8rem; margin-bottom: 0.8rem; align-items: flex-start; font-size: 0.88rem; line-height: 1.5; }
+    .instructions-box .step:last-child { margin-bottom: 0; }
+    .step-num { background: var(--purple); color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+    .middleman-name { font-family: 'Syne', sans-serif; font-weight: 700; color: var(--purple-light); }
+
+    /* PET PREVIEW */
+    .pet-preview { display: none; background: var(--surface2); border-radius: 12px; padding: 1rem; margin-bottom: 1rem; align-items: center; gap: 1rem; }
+    .pet-preview.visible { display: flex; }
+    .pet-preview img { width: 60px; height: 60px; object-fit: contain; border-radius: 8px; }
+    .pet-preview-info .pname { font-weight: 600; font-size: 0.95rem; }
+    .pet-preview-info .pval { font-size: 0.82rem; color: var(--purple-light); margin-top: 0.2rem; }
+
+    /* JOIN DEPOSIT PICKER */
+    .deposit-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 1rem; max-height: 220px; overflow-y: auto; }
+    .picker-card {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+      padding: 0.8rem; text-align: center; cursor: pointer; transition: all 0.2s;
+    }
+    .picker-card:hover { border-color: var(--purple); }
+    .picker-card.selected { border-color: var(--purple); background: rgba(147,51,234,0.15); }
+    .picker-card img { width: 50px; height: 50px; object-fit: contain; border-radius: 6px; margin: 0 auto 0.4rem; display: block; }
+    .picker-card .pname { font-size: 0.78rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .picker-card .pval { font-size: 0.72rem; color: var(--purple-light); margin-top: 0.2rem; }
+
+    /* RESULT */
+    .result-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.93); z-index: 200; flex-direction: column; justify-content: center; align-items: center; }
+    .result-overlay.active { display: flex; }
+    .result-icon { font-size: 5rem; margin-bottom: 1rem; }
+    .result-title { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 900; margin-bottom: 0.5rem; }
+    .result-sub { color: var(--muted); margin-bottom: 2rem; font-size: 0.95rem; text-align: center; max-width: 380px; line-height: 1.6; }
+
+    footer { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 3rem; }
+    footer a { color: var(--purple-light); text-decoration: none; margin: 0 0.5rem; }
+
+    /* INVENTORY */
+    .inv-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 0.45rem 1rem; border-radius: 8px; cursor: pointer; font-size: 0.88rem; font-family: 'DM Sans', sans-serif; transition: all 0.2s; display: flex; align-items: center; gap: 0.4rem; }
+    .inv-btn:hover { border-color: var(--purple); color: var(--purple-light); }
+    .inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.8rem; max-height: 380px; overflow-y: auto; margin-bottom: 1rem; padding-right: 4px; }
+    .inv-card { background: var(--surface2); border: 2px solid var(--border); border-radius: 14px; padding: 1rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
+    .inv-card:hover:not(.inv-locked) { border-color: var(--purple); transform: translateY(-2px); }
+    .inv-card.inv-selected { border-color: var(--purple); background: rgba(147,51,234,0.15); }
+    .inv-card.inv-locked { opacity: 0.5; cursor: not-allowed; }
+    .inv-card img { width: 70px; height: 70px; object-fit: contain; border-radius: 8px; margin: 0 auto 0.6rem; display: block; }
+    .inv-card .iname { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .inv-card .ival { font-size: 0.72rem; color: var(--purple-light); margin-top: 0.2rem; }
+    .inv-card .ist { font-size: 0.68rem; margin-top: 0.25rem; }
+    .inv-lock-badge { position: absolute; top: 0.4rem; right: 0.4rem; font-size: 0.65rem; padding: 0.1rem 0.45rem; border-radius: 99px; }
+    .withdraw-confirm { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.25); border-radius: 12px; padding: 1rem; margin-bottom: 1rem; display: none; }
+    .withdraw-confirm.visible { display: block; }
+    .withdraw-confirm p { font-size: 0.88rem; color: var(--muted); margin-bottom: 0.8rem; line-height: 1.5; }
+    .withdraw-confirm .pet-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem; }
+    .withdraw-confirm .pet-row img { width: 50px; height: 50px; object-fit: contain; border-radius: 8px; background: var(--surface2); }
+    .withdraw-confirm .pet-row .pname { font-weight: 600; font-size: 0.92rem; }
+    .withdraw-confirm .pet-row .pval { font-size: 0.78rem; color: var(--purple-light); margin-top: 0.15rem; }
+    .inv-empty { text-align: center; padding: 2.5rem 1rem; color: var(--muted); font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">⚡ Spin<span>Zone</span></a>
+  <div class="nav-right" id="navLinks">
+    <a href="login.html">Login</a>
+    <a href="signup.html" class="btn btn-purple">Sign Up</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-tag">🎮 PS99 · Verified RAP Values</div>
+  <h1>Flip Your Pets,<br><span class="grad">Win Big 🪙</span></h1>
+  <p>Deposit your PS99 pets, flip against real players, and walk away with the winnings — middleman secured.</p>
+  <div class="hero-actions">
+    <button class="btn btn-purple" onclick="openDepositModal()">+ Deposit Pet</button>
+    <a href="#lobby" class="btn btn-outline">Browse Lobby</a>
+  </div>
+</section>
+
+<div class="stats">
+  <div class="stat"><div class="stat-num" id="statDeposits">0</div><div class="stat-lbl">Deposited Pets</div></div>
+  <div class="stat"><div class="stat-num" id="statFlips">0</div><div class="stat-lbl">Active Flips</div></div>
+  <div class="stat"><div class="stat-num" id="statOnline">1</div><div class="stat-lbl">Online Now</div></div>
+</div>
+
+<!-- MY DEPOSITS BAR -->
+<div class="my-deposits-bar" id="myDepositsBar">
+  <div class="my-deposits-inner">
+    <h3>📦 Your Deposits</h3>
+    <div class="my-deposit-list" id="myDepositList"></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('lobby')" id="tabLobby">🐾 Pet Lobby</div>
+  <div class="tab" onclick="switchTab('flips')" id="tabFlips">🪙 Active Flips</div>
+</div>
+
+<!-- LOBBY TAB -->
+<div class="section" id="lobbyTab">
+  <div class="section-head">
+    <h2><span class="live-dot"></span>Deposit Lobby</h2>
+    <button class="btn btn-purple" onclick="openDepositModal()">+ Deposit Pet</button>
+  </div>
+  <div class="deposit-grid" id="depositGrid">
+    <div class="empty"><div class="empty-icon">🐾</div><p>No pets deposited yet.<br>Be the first to deposit!</p></div>
+  </div>
+</div>
+
+<!-- FLIPS TAB -->
+<div class="section" id="flipsTab" style="display:none">
+  <div class="section-head">
+    <h2><span class="live-dot"></span>Live Coin Flips</h2>
+  </div>
+  <div class="flip-grid" id="flipGrid">
+    <div class="empty"><div class="empty-icon">🪙</div><p>No active flips yet.<br>Deposit a pet and start one!</p></div>
+  </div>
+</div>
+
+<!-- DEPOSIT MODAL -->
+<div class="overlay" id="depositModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('depositModal')">✕</button>
+    <h2>📦 Deposit a Pet</h2>
+    <p class="modal-sub">Trade your pet directly to our middleman in PS99 — no typing needed!</p>
+
+    <!-- Trade instructions box -->
+    <div class="instructions-box" style="margin-bottom:1.2rem">
+      <div class="step"><div class="step-num">1</div><div>Open <strong>Pet Simulator 99</strong> and find the player <span class="middleman-name">SpinZone99</span>.</div></div>
+      <div class="step"><div class="step-num">2</div><div>Send them a <strong>trade request</strong> and place the pet you want to deposit.</div></div>
+      <div class="step"><div class="step-num">3</div><div>Once the middleman accepts and confirms, your pet will <strong>automatically appear</strong> in your inventory here — ready to flip!</div></div>
+    </div>
+
+    <!-- Middleman username copy box -->
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:1.2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+      <div>
+        <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.25rem;text-transform:uppercase;letter-spacing:1px">Trade to</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:var(--purple-light)">SpinZone99</div>
+      </div>
+      <button onclick="copyMiddleman()" id="copyMMBtn" style="background:rgba(147,51,234,0.15);border:1px solid rgba(147,51,234,0.4);color:var(--purple-light);padding:0.45rem 1rem;border-radius:8px;cursor:pointer;font-size:0.82rem;font-family:'DM Sans',sans-serif;white-space:nowrap;">Copy Name</button>
+    </div>
+
+    <!-- Pending status checker -->
+    <div id="depositPendingStatus" style="display:none;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:10px;padding:0.85rem 1rem;margin-bottom:1rem;font-size:0.85rem;color:#fbbf24;display:flex;align-items:center;gap:0.6rem;">
+      <span style="font-size:1.1rem">⏳</span>
+      <span id="depositPendingMsg">Waiting for middleman to confirm your trade...</span>
+    </div>
+
+    <button class="btn btn-purple" style="width:100%;padding:0.75rem" onclick="closeModal('depositModal')">Got it — I'll trade now!</button>
+  </div>
+</div>
+
+<!-- FLIP START MODAL (when clicking your own confirmed deposit) -->
+<div class="overlay" id="startFlipModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('startFlipModal')">✕</button>
+    <h2>Start a Flip 🪙</h2>
+    <p class="modal-sub" id="startFlipDesc"></p>
+    <div class="err" id="startFlipErr"></div>
+    <button class="btn btn-purple" style="width:100%; padding:0.75rem; margin-bottom:0.7rem" onclick="submitStartFlip()">Put This Pet Up for Flip</button>
+    <button class="btn btn-red" style="width:100%; padding:0.65rem" onclick="submitWithdraw()">Withdraw Deposit</button>
+  </div>
+</div>
+
+<!-- JOIN FLIP MODAL (when clicking someone else's deposit) -->
+<div class="overlay" id="joinModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('joinModal')">✕</button>
+    <h2>Join This Flip ⚔️</h2>
+    <p class="modal-sub" id="joinModalDesc"></p>
+    <div class="err" id="joinErr"></div>
+    <p style="font-size:0.82rem; color:var(--muted); margin-bottom:0.7rem">Select one of your confirmed deposits to flip with:</p>
+    <div class="deposit-picker" id="joinDepositPicker"></div>
+    <button class="btn btn-purple" style="width:100%; padding:0.75rem" onclick="submitJoin()">Flip!</button>
+  </div>
+</div>
+
+<!-- FLIP JOIN MODAL (for active flip cards) -->
+<div class="overlay" id="joinFlipModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('joinFlipModal')">✕</button>
+    <h2>Join Flip ⚔️</h2>
+    <p class="modal-sub" id="joinFlipDesc"></p>
+    <div class="err" id="joinFlipErr"></div>
+    <p style="font-size:0.82rem; color:var(--muted); margin-bottom:0.7rem">Select one of your confirmed deposits:</p>
+    <div class="deposit-picker" id="joinFlipPicker"></div>
+    <button class="btn btn-purple" style="width:100%; padding:0.75rem" onclick="submitJoinFlip()">Confirm Flip</button>
+  </div>
+</div>
+
+<!-- INVENTORY MODAL -->
+<div class="overlay" id="inventoryModal">
+  <div class="modal" style="max-width:520px">
+    <button class="modal-close" onclick="closeInventory()">✕</button>
+    <h2>🎒 My Inventory</h2>
+    <p class="modal-sub">Click a pet to withdraw it. Pets that are in a flip cannot be withdrawn.</p>
+    <div id="invContent">
+      <div class="inv-empty">Loading your deposits...</div>
+    </div>
+    <div class="withdraw-confirm" id="withdrawConfirm">
+      <div class="pet-row">
+        <img id="wPetImg" src="" alt="" />
+        <div><div class="pname" id="wPetName"></div><div class="pval" id="wPetVal"></div></div>
+      </div>
+      <p>Are you sure you want to withdraw this pet? The middleman <strong style="color:var(--purple-light)">SpinZone99</strong> will trade it back to you in PS99.</p>
+      <div style="display:flex;gap:0.6rem">
+        <button class="btn btn-red" style="flex:1;padding:0.65rem" onclick="confirmWithdraw()">↩ Yes, Withdraw</button>
+        <button class="btn" style="flex:1;padding:0.65rem;background:var(--surface2);border:1px solid var(--border);color:var(--muted)" onclick="cancelWithdrawSelect()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-icon" id="resultIcon">🏆</div>
+  <div class="result-title" id="resultTitle">You Won!</div>
+  <div class="result-sub" id="resultSub"></div>
+  <button class="btn btn-purple" style="padding:0.7rem 2rem" onclick="closeResult()">Close</button>
+</div>
+
+<footer>
+  <p>© 2026 SpinZone · <a href="#">Discord</a> · <a href="#">Terms</a> · <a href="#">Support</a></p>
+  <p style="margin-top:0.5rem">Values powered by BIG Games RAP API · Middleman: <strong style="color:var(--purple-light)">SpinZone99</strong></p>
+</footer>
+
+<script>
+  const API = 'http://localhost:3000';
+  let token = localStorage.getItem('token');
+  let username = localStorage.getItem('username');
+
+  // Nav
+  if (username) {
+    document.getElementById('navLinks').innerHTML = `
+      <a href="verify-roblox.html">Link Roblox</a>
+      <button class="inv-btn" onclick="openInventory()">🎒 Inventory</button>
+      <span style="color:var(--purple-light); font-size:0.9rem">👤 ${username}</span>
+      <a href="#" onclick="logout()" style="color:var(--red)">Logout</a>
+    `;
+  }
+  function logout() { localStorage.clear(); location.href = 'index.html'; }
+
+  // Tabs
+  function switchTab(tab) {
+    document.getElementById('lobbyTab').style.display = tab === 'lobby' ? 'block' : 'none';
+    document.getElementById('flipsTab').style.display = tab === 'flips' ? 'block' : 'none';
+    document.getElementById('tabLobby').classList.toggle('active', tab === 'lobby');
+    document.getElementById('tabFlips').classList.toggle('active', tab === 'flips');
+  }
+
+  // Modal helpers
+  function openModal(id) { document.getElementById(id).classList.add('active'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+  function showErr(id, msg) { const el = document.getElementById(id); el.style.display='block'; el.textContent='❌ '+msg; }
+  function hideErr(id) { document.getElementById(id).style.display='none'; }
+
+  // WS
+  let ws;
+  let allDeposits = [];
+  let allFlips = [];
+  let myDeposits = [];
+
+  function connectWS() {
+    ws = new WebSocket('ws://localhost:3000');
+    ws.onmessage = (e) => {
+      const msg = JSON.parse(e.data);
+      if (msg.type === 'deposits') { allDeposits = msg.deposits; renderAll(); }
+      if (msg.type === 'flips') { allFlips = msg.flips; renderAll(); }
+      if (msg.type === 'flip_result') handleResult(msg);
+      if (msg.type === 'deposit_confirmed') {
+        if (msg.username === username) {
+          showNotice(`✅ Your ${msg.petName} has been confirmed! You can now start a flip.`);
+        }
+        loadMyDeposits();
+      }
+    };
+    ws.onclose = () => setTimeout(connectWS, 2000);
+  }
+  connectWS();
+
+  function showNotice(msg) {
+    const n = document.createElement('div');
+    n.style.cssText = 'position:fixed;top:80px;right:1rem;background:#1a1a2e;border:1px solid var(--purple);color:var(--purple-light);padding:0.8rem 1.2rem;border-radius:10px;z-index:300;font-size:0.88rem;max-width:300px;';
+    n.textContent = msg;
+    document.body.appendChild(n);
+    setTimeout(() => n.remove(), 5000);
+  }
+
+  async function loadMyDeposits() {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API}/api/deposits/mine`, { headers: { Authorization: 'Bearer ' + token } });
+      myDeposits = await res.json();
+      renderMyDepositsBar();
+    } catch {}
+  }
+  loadMyDeposits();
+
+  function renderMyDepositsBar() {
+    const bar = document.getElementById('myDepositsBar');
+    const list = document.getElementById('myDepositList');
+    const active = myDeposits.filter(d => !['returned','sent'].includes(d.status));
+    if (!username || active.length === 0) { bar.classList.remove('visible'); return; }
+    bar.classList.add('visible');
+    list.innerHTML = active.map(d => `
+      <div class="my-deposit-item">
+        <img src="${d.petImage}" onerror="this.src=''" alt="" />
+        <div class="my-deposit-info">
+          <div class="name">${d.petName}</div>
+          <div class="val">${d.petValue.toLocaleString()} RAP</div>
+          <div class="st st-${d.status}">${statusLabel(d.status)}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function statusLabel(s) {
+    return { pending:'⏳ Awaiting trade', confirmed:'✅ Ready to flip', in_flip:'🪙 In flip', won:'🏆 Won!', returned:'↩ Returned', sent:'✓ Sent' }[s] || s;
+  }
+
+  function renderAll() {
+    renderDepositGrid();
+    renderFlipGrid();
+    document.getElementById('statDeposits').textContent = allDeposits.filter(d => d.status === 'confirmed').length;
+    document.getElementById('statFlips').textContent = allFlips.filter(f => f.status === 'waiting').length;
+    loadMyDeposits();
+  }
+
+  function renderDepositGrid() {
+    const grid = document.getElementById('depositGrid');
+    const confirmed = allDeposits.filter(d => d.status === 'confirmed' || d.status === 'pending');
+    if (confirmed.length === 0) {
+      grid.innerHTML = '<div class="empty"><div class="empty-icon">🐾</div><p>No pets deposited yet.<br>Be the first to deposit!</p></div>';
+      return;
+    }
+    grid.innerHTML = confirmed.map(d => {
+      const isMe = d.username === username;
+      const isPending = d.status === 'pending';
+      const clickable = !isPending;
+      return `
+        <div class="deposit-card ${isMe ? 'mine' : ''} ${isPending ? 'pending-card' : ''}"
+             ${clickable ? `onclick="onDepositClick('${d.id}', '${d.username}', ${d.petValue}, '${d.petName.replace(/'/g,"\\'")}', '${isMe}')"` : ''}>
+          ${isMe ? '<div class="mine-tag">Yours</div>' : ''}
+          <div class="deposit-status-badge ${isPending ? 'badge-pending' : 'badge-confirmed'}">${isPending ? '⏳ Pending' : '✅ Ready'}</div>
+          <img class="pet-img" src="${d.petImage}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt="${d.petName}" />
+          <div class="pet-img-placeholder" style="display:none">🐾</div>
+          <div class="deposit-pet-name">${d.petName}</div>
+          <div class="deposit-value">${d.petValue.toLocaleString()} RAP</div>
+          <div class="deposit-user">@${d.username}</div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderFlipGrid() {
+    const grid = document.getElementById('flipGrid');
+    if (allFlips.length === 0) {
+      grid.innerHTML = '<div class="empty"><div class="empty-icon">🪙</div><p>No active flips yet.<br>Deposit a pet and start one!</p></div>';
+      return;
+    }
+    grid.innerHTML = allFlips.map(f => {
+      const isDone = f.status === 'done';
+      const isCreator = f.creator?.username === username;
+      const joinerSide = f.joiner
+        ? `<div class="flip-side">
+            <img src="${f.joiner.petImage}" onerror="this.style.display='none'" alt="" />
+            <div class="flip-side-name">${f.joiner.petName}</div>
+            <div class="flip-side-val">${f.joiner.petValue.toLocaleString()} RAP</div>
+            <div class="flip-side-user">@${f.joiner.username}</div>
+          </div>`
+        : `<div class="flip-empty">Waiting for<br>challenger...</div>`;
+
+      const btn = isDone
+        ? `<div class="winner-bar">🏆 Winner: ${f.winnerUsername}</div>`
+        : isCreator
+          ? `<button class="flip-btn flip-btn-cancel" onclick="cancelFlip('${f.id}')">Cancel Flip</button>`
+          : `<button class="flip-btn flip-btn-join" onclick="openJoinFlipModal('${f.id}', ${f.creator?.petValue}, '${f.creator?.petName?.replace(/'/g,"\\'")}')">Join This Flip</button>`;
+
+      return `
+        <div class="flip-card ${isDone ? 'done' : ''}">
+          <div class="flip-top"><span>🪙 50/50 Coin Flip</span><span class="badge ${isDone ? 'badge-done' : 'badge-live'}">${isDone ? '✓ DONE' : '● LIVE'}</span></div>
+          <div class="vs-row">
+            <div class="flip-side">
+              <img src="${f.creator?.petImage}" onerror="this.style.display='none'" alt="" />
+              <div class="flip-side-name">${f.creator?.petName}</div>
+              <div class="flip-side-val">${f.creator?.petValue?.toLocaleString()} RAP</div>
+              <div class="flip-side-user">@${f.creator?.username}</div>
+            </div>
+            <div class="vs-label">VS</div>
+            ${joinerSide}
+          </div>
+          ${btn}
+        </div>`;
+    }).join('');
+  }
+
+  // ---- DEPOSIT CLICK ----
+  let selectedDepositId = null;
+  let selectedFlipId = null;
+  let selectedJoinDepositId = null;
+
+  function onDepositClick(depositId, depUsername, petValue, petName, isMe) {
+    if (isMe === 'true') {
+      // Open start flip modal
+      selectedDepositId = depositId;
+      document.getElementById('startFlipDesc').textContent = `Put "${petName}" (${Number(petValue).toLocaleString()} RAP) up for a 50/50 flip?`;
+      hideErr('startFlipErr');
+      openModal('startFlipModal');
+    } else {
+      // Open join modal — pick from my confirmed deposits
+      if (!token) { alert('🔒 Login to join a flip!'); location.href = 'login.html'; return; }
+      selectedFlipId = null; // we'll create the flip from the deposit side
+      selectedDepositId = depositId; // the deposit we're challenging
+      const myConfirmed = myDeposits.filter(d => d.status === 'confirmed');
+      if (myConfirmed.length === 0) {
+        alert('You need a confirmed deposit to join a flip. Deposit a pet first!');
+        return;
+      }
+      document.getElementById('joinModalDesc').textContent = `Challenge @${depUsername}'s ${petName} (${Number(petValue).toLocaleString()} RAP). Your pet must be within 10%.`;
+      hideErr('joinErr');
+      selectedJoinDepositId = null;
+      const picker = document.getElementById('joinDepositPicker');
+      picker.innerHTML = myConfirmed.map(d => `
+        <div class="picker-card" onclick="selectJoinDeposit('${d.id}', this)">
+          <img src="${d.petImage}" onerror="this.style.display='none'" alt="" />
+          <div class="pname">${d.petName}</div>
+          <div class="pval">${d.petValue.toLocaleString()} RAP</div>
+        </div>
+      `).join('');
+      openModal('joinModal');
+    }
+  }
+
+  function selectJoinDeposit(id, el) {
+    selectedJoinDepositId = id;
+    document.querySelectorAll('#joinDepositPicker .picker-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  async function submitJoin() {
+    if (!selectedJoinDepositId) { showErr('joinErr', 'Select one of your deposits first.'); return; }
+    // We need to find which flip this deposit belongs to — or create one
+    // Actually: clicking a deposit card in the lobby means we need the flip that the deposit is part of
+    // Let's find the flip with creatorDepositId = selectedDepositId
+    const flip = allFlips.find(f => f.status === 'waiting' && allDeposits.find(d => d.id === selectedDepositId && f.creator?.username === d.username));
+    if (!flip) { showErr('joinErr', 'This pet is not currently in an active flip. Ask the owner to start one!'); return; }
+    try {
+      const res = await fetch(`${API}/api/flips/join`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify({ flipId: flip.id, depositId: selectedJoinDepositId })
+      });
+      const data = await res.json();
+      if (res.ok) { closeModal('joinModal'); switchTab('flips'); }
+      else showErr('joinErr', data.error);
+    } catch { showErr('joinErr', 'Could not connect to server.'); }
+  }
+
+  // ---- START FLIP ----
+  async function submitStartFlip() {
+    try {
+      const res = await fetch(`${API}/api/flips/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify({ depositId: selectedDepositId })
+      });
+      const data = await res.json();
+      if (res.ok) { closeModal('startFlipModal'); switchTab('flips'); }
+      else showErr('startFlipErr', data.error);
+    } catch { showErr('startFlipErr', 'Could not connect.'); }
+  }
+
+  async function submitWithdraw() {
+    if (!confirm('Withdraw this deposit? (Note: middleman must return the pet to you in-game)')) return;
+    try {
+      const res = await fetch(`${API}/api/deposits/cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify({ depositId: selectedDepositId })
+      });
+      const data = await res.json();
+      if (res.ok) { closeModal('startFlipModal'); showNotice('↩ Withdrawal requested. Contact the middleman to get your pet back.'); loadMyDeposits(); }
+      else showErr('startFlipErr', data.error);
+    } catch { showErr('startFlipErr', 'Could not connect.'); }
+  }
+
+  // ---- JOIN FLIP (from flip card) ----
+  function openJoinFlipModal(flipId, flipValue, petName) {
+    if (!token) { alert('🔒 Login to join!'); location.href = 'login.html'; return; }
+    selectedFlipId = flipId;
+    selectedJoinDepositId = null;
+    document.getElementById('joinFlipDesc').textContent = `Flip value: ${Number(flipValue).toLocaleString()} RAP (${petName}). Your pet must be within 10%.`;
+    hideErr('joinFlipErr');
+    const myConfirmed = myDeposits.filter(d => d.status === 'confirmed');
+    const picker = document.getElementById('joinFlipPicker');
+    if (myConfirmed.length === 0) {
+      picker.innerHTML = '<p style="color:var(--muted);font-size:0.85rem;grid-column:1/-1">No confirmed deposits. Deposit a pet first!</p>';
+    } else {
+      picker.innerHTML = myConfirmed.map(d => `
+        <div class="picker-card" onclick="selectJoinFlipDeposit('${d.id}', this)">
+          <img src="${d.petImage}" onerror="this.style.display='none'" alt="" />
+          <div class="pname">${d.petName}</div>
+          <div class="pval">${d.petValue.toLocaleString()} RAP</div>
+        </div>
+      `).join('');
+    }
+    openModal('joinFlipModal');
+  }
+
+  function selectJoinFlipDeposit(id, el) {
+    selectedJoinDepositId = id;
+    document.querySelectorAll('#joinFlipPicker .picker-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  async function submitJoinFlip() {
+    if (!selectedJoinDepositId) { showErr('joinFlipErr', 'Select one of your deposits.'); return; }
+    try {
+      const res = await fetch(`${API}/api/flips/join`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify({ flipId: selectedFlipId, depositId: selectedJoinDepositId })
+      });
+      const data = await res.json();
+      if (res.ok) closeModal('joinFlipModal');
+      else showErr('joinFlipErr', data.error);
+    } catch { showErr('joinFlipErr', 'Could not connect.'); }
+  }
+
+  // ---- CANCEL FLIP ----
+  async function cancelFlip(flipId) {
+    if (!confirm('Cancel this flip?')) return;
+    await fetch(`${API}/api/flips/cancel`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      body: JSON.stringify({ flipId })
+    });
+  }
+
+  // ---- DEPOSIT MODAL ----
+  function openDepositModal() {
+    if (!token) { alert('🔒 Login to deposit!'); location.href = 'login.html'; return; }
+    // Show pending status if they already have one waiting
+    const pending = myDeposits.find(d => d.status === 'pending');
+    const pendingBox = document.getElementById('depositPendingStatus');
+    if (pending) {
+      pendingBox.style.display = 'flex';
+      document.getElementById('depositPendingMsg').textContent = `Waiting for middleman to confirm your trade of "${pending.petName}"...`;
+    } else {
+      pendingBox.style.display = 'none';
+    }
+    openModal('depositModal');
+  }
+
+  function copyMiddleman() {
+    navigator.clipboard.writeText('SpinZone99');
+    const btn = document.getElementById('copyMMBtn');
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = 'Copy Name', 2000);
+  }
+
+  let depositLookupTimer = null;
+  let depositPetData = null;
+  function lookupDepositPet() {
+    clearTimeout(depositLookupTimer);
+    const name = document.getElementById('depositPetName').value.trim();
+    if (!name) { document.getElementById('depositHint').textContent = ''; document.getElementById('depositPreview').classList.remove('visible'); return; }
+    document.getElementById('depositHint').textContent = 'Looking up...';
+    depositLookupTimer = setTimeout(async () => {
+      try {
+        const res = await fetch(`${API}/api/pet-value?name=${encodeURIComponent(name)}`);
+        const data = await res.json();
+        if (res.ok) {
+          depositPetData = data;
+          document.getElementById('depositHint').textContent = '';
+          document.getElementById('depositPreviewImg').src = data.image;
+          document.getElementById('depositPreviewName').textContent = data.name;
+          document.getElementById('depositPreviewVal').textContent = data.value.toLocaleString() + ' RAP';
+          document.getElementById('depositPreview').classList.add('visible');
+        } else {
+          depositPetData = null;
+          document.getElementById('depositPreview').classList.remove('visible');
+          document.getElementById('depositHint').textContent = '❌ ' + data.error;
+        }
+      } catch { document.getElementById('depositHint').textContent = '❌ Could not connect'; }
+    }, 600);
+  }
+
+  async function submitDeposit() {
+    const petName = document.getElementById('depositPetName').value.trim();
+    hideErr('depositErr');
+    if (!petName) { showErr('depositErr', 'Enter a pet name'); return; }
+    try {
+      const res = await fetch(`${API}/api/deposits/request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify({ petName })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        closeModal('depositModal');
+        showNotice(`📦 Deposit submitted! Now trade "${data.deposit.petName}" to SpinZone99 in PS99.`);
+        loadMyDeposits();
+      } else showErr('depositErr', data.error);
+    } catch { showErr('depositErr', 'Could not connect to server.'); }
+  }
+
+  // ---- RESULT ----
+  function handleResult(msg) {
+    const isWinner = msg.winnerUsername === username;
+    document.getElementById('resultIcon').textContent = isWinner ? '🏆' : '😢';
+    document.getElementById('resultTitle').textContent = isWinner ? 'You Won!' : 'You Lost!';
+    document.getElementById('resultSub').textContent = isWinner
+      ? 'Congrats! The middleman SpinZone99 will trade your winnings to you in PS99.'
+      : 'Better luck next time! Your pet will be traded to the winner.';
+    document.getElementById('resultOverlay').classList.add('active');
+    loadMyDeposits();
+  }
+  function closeResult() { document.getElementById('resultOverlay').classList.remove('active'); }
+
+  // ---- INVENTORY ----
+  let selectedWithdrawId = null;
+
+  async function openInventory() {
+    if (!token) { alert('🔒 Login first!'); location.href = 'login.html'; return; }
+    selectedWithdrawId = null;
+    document.getElementById('withdrawConfirm').classList.remove('visible');
+    openModal('inventoryModal');
+    await loadMyDeposits();
+    renderInventory();
+  }
+
+  function closeInventory() {
+    closeModal('inventoryModal');
+    selectedWithdrawId = null;
+    document.getElementById('withdrawConfirm').classList.remove('visible');
+  }
+
+  function renderInventory() {
+    const content = document.getElementById('invContent');
+    if (myDeposits.length === 0) {
+      content.innerHTML = '<div class="inv-empty">📦 You have no deposits yet.<br>Deposit a pet to get started!</div>';
+      return;
+    }
+    const statusOrder = { pending: 0, confirmed: 1, in_flip: 2, won: 3, returned: 4, sent: 5 };
+    const sorted = [...myDeposits].sort((a, b) => (statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9));
+    const locked = ['in_flip', 'won', 'returned', 'sent'];
+    content.innerHTML = `<div class="inv-grid">${sorted.map(d => {
+      const isLocked = locked.includes(d.status);
+      const statusColors = { pending:'color:#fbbf24', confirmed:'color:var(--green)', in_flip:'color:var(--purple-light)', won:'color:var(--green)', returned:'color:var(--muted)', sent:'color:var(--muted)' };
+      const lockBadges = { in_flip:'<span class="inv-lock-badge" style="background:rgba(147,51,234,0.2);color:var(--purple-light);border:1px solid rgba(147,51,234,0.3)">🪙 In Flip</span>', won:'<span class="inv-lock-badge" style="background:rgba(74,222,128,0.15);color:var(--green);border:1px solid rgba(74,222,128,0.3)">🏆 Won</span>', returned:'<span class="inv-lock-badge" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border)">↩ Returned</span>', sent:'<span class="inv-lock-badge" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border)">✓ Sent</span>' };
+      return `
+        <div class="inv-card ${isLocked ? 'inv-locked' : ''}" ${!isLocked ? `onclick="selectWithdraw('${d.id}', '${d.petName.replace(/'/g,"\\'")}', ${d.petValue}, '${d.petImage}')"` : ''}>
+          ${lockBadges[d.status] || ''}
+          <img src="${d.petImage}" onerror="this.style.display='none'" alt="${d.petName}" />
+          <div class="iname">${d.petName}</div>
+          <div class="ival">${d.petValue.toLocaleString()} RAP</div>
+          <div class="ist" style="${statusColors[d.status] || ''}">${statusLabel(d.status)}</div>
+        </div>`;
+    }).join('')}</div>`;
+  }
+
+  function selectWithdraw(id, petName, petValue, petImage) {
+    selectedWithdrawId = id;
+    document.getElementById('wPetImg').src = petImage;
+    document.getElementById('wPetName').textContent = petName;
+    document.getElementById('wPetVal').textContent = petValue.toLocaleString() + ' RAP';
+    document.getElementById('withdrawConfirm').classList.add('visible');
+    // Highlight selected card
+    document.querySelectorAll('.inv-card').forEach(c => c.classList.remove('inv-selected'));
+    event.currentTarget.classList.add('inv-selected');
+  }
+
+  function cancelWithdrawSelect() {
+    selectedWithdrawId = null;
+    document.getElementById('withdrawConfirm').classList.remove('visible');
+    document.querySelectorAll('.inv-card').forEach(c => c.classList.remove('inv-selected'));
+  }
+
+  async function confirmWithdraw() {
+    if (!selectedWithdrawId) return;
+    try {
+      const res = await fetch(`${API}/api/deposits/cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify({ depositId: selectedWithdrawId })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        closeInventory();
+        showNotice('↩ Withdrawal requested! SpinZone99 will trade your pet back in PS99.');
+        await loadMyDeposits();
+      } else {
+        showNotice('❌ ' + data.error);
+      }
+    } catch { showNotice('❌ Could not connect to server.'); }
+  }
+</script>
+</body>
+</html>

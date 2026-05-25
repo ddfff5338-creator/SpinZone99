@@ -1,0 +1,256 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SpinZone - Login</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f0f1a;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: #1a1a2e;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #7c5cbf;
+      text-decoration: none;
+    }
+
+    .nav-links a {
+      color: #ccc;
+      text-decoration: none;
+      margin-left: 1.5rem;
+    }
+
+    .btn-primary {
+      background: #7c5cbf;
+      color: white;
+      padding: 0.5rem 1.2rem;
+      border-radius: 8px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      width: 100%;
+    }
+
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex: 1;
+      padding: 2rem;
+    }
+
+    .login-box {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 16px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .login-box h2 {
+      text-align: center;
+      margin-bottom: 0.5rem;
+      font-size: 1.8rem;
+    }
+
+    .login-box p {
+      text-align: center;
+      color: #aaa;
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
+    }
+
+    .input-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 0.4rem;
+      color: #ccc;
+      font-size: 0.9rem;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: #0f0f1a;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .input-group input:focus {
+      border-color: #7c5cbf;
+    }
+
+    .login-btn {
+      margin-top: 1rem;
+    }
+
+    .divider {
+      text-align: center;
+      color: #555;
+      margin: 1.2rem 0;
+      font-size: 0.85rem;
+    }
+
+    .roblox-btn {
+      width: 100%;
+      padding: 0.75rem;
+      background: #00b06f;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .roblox-btn:hover {
+      background: #009960;
+    }
+
+    .signup-link {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: #aaa;
+      font-size: 0.9rem;
+    }
+
+    .signup-link a {
+      color: #7c5cbf;
+      text-decoration: none;
+    }
+
+    .error-msg {
+      background: #3a1a1a;
+      border: 1px solid #7a2a2a;
+      color: #ff6b6b;
+      padding: 0.75rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="logo">SpinZone</a>
+    <div class="nav-links">
+      <a href="#">Browse Trades</a>
+      <a href="login.html">Login</a>
+      <a href="#" class="btn-primary">Sign Up</a>
+    </div>
+  </nav>
+
+  <div class="login-container">
+    <div class="login-box">
+
+      <h2>Welcome Back</h2>
+      <p>Login to your SpinZone account</p>
+
+      <div class="error-msg" id="errorMsg"></div>
+
+      <div class="input-group">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="Enter your username" />
+      </div>
+
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Enter your password" />
+      </div>
+
+      <div class="login-btn">
+        <button class="btn-primary" onclick="handleLogin()">Login</button>
+      </div>
+
+      <div class="divider">— or —</div>
+
+      <button class="roblox-btn" onclick="robloxLogin()">
+        🟢 Continue with Roblox
+      </button>
+
+      <div class="signup-link">
+        Don't have an account? <a href="#">Sign Up</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+  async function handleLogin() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const errorMsg = document.getElementById('errorMsg');
+
+    errorMsg.style.display = 'none';
+
+    if (!username || !password) {
+      errorMsg.style.display = 'block';
+      errorMsg.textContent = '❌ Please fill in all fields';
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:3000/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('username', data.username);
+        localStorage.setItem('loggedIn', 'true');
+        window.location.href = 'index.html';
+      } else {
+        errorMsg.style.display = 'block';
+        errorMsg.textContent = '❌ ' + data.error;
+      }
+
+    } catch (err) {
+      errorMsg.style.display = 'block';
+      errorMsg.textContent = '❌ Could not connect to server. Is it running?';
+    }
+  }
+
+  function robloxLogin() {
+    alert('🚧 Roblox login coming soon! This requires a backend server.');
+  }
+</script>
+
+</body>
+</html>
