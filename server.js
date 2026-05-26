@@ -364,17 +364,25 @@ app.post('/api/flips/join', authenticateToken, async (req, res) => {
   }
 
   const creatorWins = Math.random() < 0.5;
+  const winnerDeposit = creatorWins ? creatorDeposit : joinerDeposit;
+  const loserDeposit = creatorWins ? joinerDeposit : creatorDeposit;
+
   flip.status = 'done';
   flip.joinerDepositId = depositId;
-  flip.winnerId = creatorWins ? creatorDeposit.userId : joinerDeposit.userId;
-  flip.winnerUsername = creatorWins ? creatorDeposit.username : joinerDeposit.username;
+  flip.winnerId = winnerDeposit.userId;
+  flip.winnerUsername = winnerDeposit.username;
   flip.finishedAt = new Date();
   await flip.save();
 
-  joinerDeposit.status = 'in_flip';
-  creatorDeposit.status = creatorWins ? 'won' : 'returned';
-  joinerDeposit.status = creatorWins ? 'returned' : 'won';
+  // Both pets transfer to the winner as confirmed deposits (ready to flip again)
+  creatorDeposit.status = 'confirmed';
+  creatorDeposit.userId = winnerDeposit.userId;
+  creatorDeposit.username = winnerDeposit.username;
   await creatorDeposit.save();
+
+  joinerDeposit.status = 'confirmed';
+  joinerDeposit.userId = winnerDeposit.userId;
+  joinerDeposit.username = winnerDeposit.username;
   await joinerDeposit.save();
 
   broadcast({ type: 'deposits', deposits: await getPublicDeposits() });
