@@ -250,8 +250,8 @@ if (myUsername) {
 function logout() { localStorage.clear(); location.href = 'index.html'; }
 
 // MODAL HELPERS
-function open(id) { document.getElementById(id).classList.add('open'); }
-function close(id) { document.getElementById(id).classList.remove('open'); }
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 function showErr(id, msg) { const e = document.getElementById(id); e.style.display='block'; e.textContent='❌ '+msg; }
 function hideErr(id) { document.getElementById(id).style.display='none'; }
 
