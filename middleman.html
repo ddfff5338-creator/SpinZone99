@@ -2,410 +2,258 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>SpinZone — Middleman Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <title>SpinZone — Middleman</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #07070f; --surface: #0e0e1c; --surface2: #141428; --border: #1e1e3a;
-      --purple: #9333ea; --purple-light: #c084fc; --green: #4ade80; --red: #f87171;
-      --yellow: #fbbf24; --text: #f0f0ff; --muted: #6b6b8a;
-    }
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
-    nav { display:flex; justify-content:space-between; align-items:center; padding:1rem 2rem; background:var(--surface); border-bottom:1px solid var(--border); }
-    .logo { font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:900; color:var(--purple-light); }
-    .admin-badge { background:rgba(147,51,234,0.2); border:1px solid var(--purple); color:var(--purple-light); padding:0.3rem 0.8rem; border-radius:99px; font-size:0.78rem; }
+    :root{--bg:#08080f;--surface:#0f0f1e;--surface2:#161628;--border:#1c1c38;--purple:#8b5cf6;--purple2:#a78bfa;--green:#34d399;--red:#f87171;--yellow:#fbbf24;--text:#eeeeff;--muted:#5a5a7a;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+    nav{display:flex;justify-content:space-between;align-items:center;padding:.9rem 2rem;background:var(--surface);border-bottom:1px solid var(--border);}
+    .logo{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:3px;color:var(--purple2);}
+    .badge{padding:.2rem .7rem;border-radius:99px;font-size:.72rem;background:rgba(139,92,246,.15);color:var(--purple2);border:1px solid rgba(139,92,246,.3);}
+    .btn{padding:.45rem 1rem;border-radius:8px;border:none;font-size:.83rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+    .btn-primary{background:var(--purple);color:#fff;}
+    .btn-primary:hover{background:#7c3aed;}
+    .btn-green{background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.3);}
+    .btn-green:hover{background:rgba(52,211,153,.2);}
+    .btn-red{background:rgba(248,113,113,.08);color:var(--red);border:1px solid rgba(248,113,113,.25);}
+    .btn-red:hover{background:rgba(248,113,113,.15);}
 
-    .login-wrap { display:flex; justify-content:center; align-items:center; min-height:calc(100vh - 60px); padding:2rem; }
-    .login-box { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:2.5rem; width:100%; max-width:380px; text-align:center; }
-    .login-box h2 { font-family:'Syne',sans-serif; font-size:1.5rem; font-weight:800; margin-bottom:0.5rem; }
-    .login-box p { color:var(--muted); font-size:0.88rem; margin-bottom:1.5rem; }
-    .field { margin-bottom:1rem; text-align:left; }
-    .field label { display:block; font-size:0.8rem; color:var(--muted); margin-bottom:0.4rem; }
-    .field input { width:100%; padding:0.7rem 1rem; background:var(--surface2); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:0.95rem; font-family:'DM Sans',sans-serif; outline:none; }
-    .field input:focus { border-color:var(--purple); }
-    .btn { padding:0.65rem 1.4rem; border-radius:10px; border:none; cursor:pointer; font-size:0.9rem; font-family:'DM Sans',sans-serif; font-weight:600; transition:all 0.2s; }
-    .btn-purple { background:var(--purple); color:white; width:100%; }
-    .btn-purple:hover { background:#7c22d3; }
-    .btn-green { background:rgba(74,222,128,0.15); color:var(--green); border:1px solid rgba(74,222,128,0.4); font-size:0.82rem; padding:0.4rem 0.9rem; }
-    .btn-green:hover { background:rgba(74,222,128,0.25); }
-    .btn-red { background:rgba(248,113,113,0.1); color:var(--red); border:1px solid rgba(248,113,113,0.3); font-size:0.82rem; padding:0.4rem 0.9rem; }
-    .err { background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); color:var(--red); padding:0.7rem; border-radius:8px; font-size:0.85rem; margin-bottom:1rem; display:none; }
+    /* LOGIN */
+    .login-wrap{display:flex;justify-content:center;align-items:center;min-height:calc(100vh - 60px);padding:2rem;}
+    .login-box{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:2.5rem;width:100%;max-width:360px;text-align:center;}
+    .login-box h2{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:2px;margin-bottom:.4rem;}
+    .login-box p{color:var(--muted);font-size:.85rem;margin-bottom:1.5rem;}
+    .field{margin-bottom:1rem;text-align:left;}
+    .field label{display:block;font-size:.75rem;color:var(--muted);margin-bottom:.3rem;}
+    .field input{width:100%;padding:.65rem 1rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9rem;outline:none;}
+    .field input:focus{border-color:var(--purple);}
+    .err{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.25);color:var(--red);padding:.65rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem;display:none;}
 
-    #dashboard { display:none; }
-    .dash-header { padding:1.5rem 2rem; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
-    .dash-header h1 { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:800; }
-    .refresh-btn { background:var(--surface2); border:1px solid var(--border); color:var(--muted); padding:0.4rem 1rem; border-radius:8px; cursor:pointer; font-size:0.85rem; }
-    .refresh-btn:hover { color:var(--text); border-color:var(--purple); }
+    /* DASHBOARD */
+    #dashboard{display:none;}
+    .dash-header{padding:1.2rem 2rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+    .dash-header h1{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:2px;}
+    .body{max-width:1100px;margin:0 auto;padding:2rem;}
+    .section-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;margin-bottom:1rem;display:flex;align-items:center;gap:.6rem;}
+    .count{background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:.1rem .55rem;font-size:.72rem;color:var(--muted);font-family:'DM Sans',sans-serif;}
 
-    .dash-body { max-width:1200px; margin:0 auto; padding:2rem; }
-    .section-title { font-family:'Syne',sans-serif; font-size:1rem; font-weight:700; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem; }
-    .count-badge { background:var(--surface2); border:1px solid var(--border); border-radius:99px; padding:0.15rem 0.6rem; font-size:0.75rem; color:var(--muted); }
+    table{width:100%;border-collapse:collapse;margin-bottom:2.5rem;}
+    th{text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:.55rem 1rem;border-bottom:1px solid var(--border);}
+    td{padding:.8rem 1rem;border-bottom:1px solid var(--border);font-size:.85rem;vertical-align:middle;}
+    tr:hover td{background:rgba(255,255,255,.015);}
+    .pet-cell{display:flex;align-items:center;gap:.7rem;}
+    .pet-cell img{width:40px;height:40px;object-fit:contain;border-radius:6px;background:var(--surface2);}
+    .pet-name{font-weight:600;font-size:.85rem;}
+    .pet-val{font-size:.72rem;color:var(--purple2);margin-top:.1rem;}
+    .time{font-size:.72rem;color:var(--muted);}
+    .actions{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;}
 
-    .deposit-table { width:100%; border-collapse:collapse; margin-bottom:2.5rem; }
-    .deposit-table th { text-align:left; font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; color:var(--muted); padding:0.6rem 1rem; border-bottom:1px solid var(--border); }
-    .deposit-table td { padding:0.85rem 1rem; border-bottom:1px solid var(--border); font-size:0.88rem; vertical-align:middle; }
-    .deposit-table tr:hover td { background:rgba(255,255,255,0.02); }
-    .pet-cell { display:flex; align-items:center; gap:0.8rem; }
-    .pet-cell img { width:44px; height:44px; object-fit:contain; border-radius:8px; background:var(--surface2); }
-    .pet-cell .pname { font-weight:600; font-size:0.88rem; }
-    .pet-cell .pval { font-size:0.75rem; color:var(--purple-light); margin-top:0.15rem; }
-    .status-pill { display:inline-block; padding:0.2rem 0.65rem; border-radius:99px; font-size:0.72rem; font-weight:500; }
-    .sp-pending { background:rgba(251,191,36,0.15); color:var(--yellow); border:1px solid rgba(251,191,36,0.3); }
-    .sp-confirmed { background:rgba(74,222,128,0.1); color:var(--green); border:1px solid rgba(74,222,128,0.3); }
-    .sp-in_flip { background:rgba(147,51,234,0.15); color:var(--purple-light); border:1px solid rgba(147,51,234,0.3); }
-    .sp-won { background:rgba(74,222,128,0.15); color:var(--green); border:1px solid rgba(74,222,128,0.4); }
-    .sp-returned { background:rgba(107,107,138,0.15); color:var(--muted); border:1px solid var(--border); }
-    .sp-sent { background:rgba(107,107,138,0.1); color:var(--muted); border:1px solid var(--border); }
-    .action-btns { display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; }
-    .time-ago { font-size:0.75rem; color:var(--muted); }
-
-    /* FILL PET INLINE */
-    .fill-pet-wrap { display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; }
-    .fill-pet-wrap .ac-wrap { position:relative; }
-    .fill-pet-wrap input {
-      padding:0.4rem 0.75rem; background:var(--surface2); border:1px solid var(--border);
-      border-radius:8px; color:var(--text); font-size:0.82rem; font-family:'DM Sans',sans-serif;
-      outline:none; width:200px;
-    }
-    .fill-pet-wrap input:focus { border-color:var(--green); }
-    .ac-dropdown {
-      position:absolute; top:calc(100% + 4px); left:0; min-width:260px;
-      background:var(--surface); border:1px solid var(--border); border-radius:8px;
-      z-index:100; max-height:200px; overflow-y:auto; display:none;
-      box-shadow:0 8px 24px rgba(0,0,0,0.5);
-    }
-    .ac-dropdown.open { display:block; }
-    .ac-item { padding:0.5rem 0.75rem; font-size:0.83rem; cursor:pointer; display:flex; align-items:center; gap:0.6rem; }
-    .ac-item:hover { background:rgba(147,51,234,0.15); }
-    .ac-item img { width:28px; height:28px; object-fit:contain; border-radius:4px; background:var(--surface2); }
-    .ac-item .ac-val { margin-left:auto; font-size:0.72rem; color:var(--purple-light); white-space:nowrap; }
-    .fill-preview { font-size:0.75rem; color:var(--green); white-space:nowrap; }
+    /* PET SEARCH */
+    .pet-search-wrap{position:relative;}
+    .pet-search-wrap input{padding:.38rem .75rem;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:.8rem;outline:none;width:190px;}
+    .pet-search-wrap input:focus{border-color:var(--green);}
+    .drop{position:absolute;top:calc(100% + 4px);left:0;min-width:240px;background:var(--surface);border:1px solid var(--border);border-radius:8px;z-index:100;max-height:180px;overflow-y:auto;display:none;box-shadow:0 8px 24px rgba(0,0,0,.5);}
+    .drop.open{display:block;}
+    .drop-item{padding:.45rem .75rem;font-size:.8rem;cursor:pointer;display:flex;align-items:center;gap:.5rem;}
+    .drop-item:hover{background:rgba(139,92,246,.15);}
+    .drop-item img{width:26px;height:26px;object-fit:contain;border-radius:4px;}
+    .drop-item .dval{margin-left:auto;font-size:.7rem;color:var(--purple2);}
+    .preview-val{font-size:.72rem;color:var(--green);white-space:nowrap;}
   </style>
 </head>
 <body>
-
 <nav>
-  <div class="logo">⚡ SpinZone — Middleman</div>
-  <span class="admin-badge">🔒 Admin Panel</span>
+  <div class="logo">SpinZone MM</div>
+  <span class="badge">🔒 Middleman Panel</span>
 </nav>
 
-<!-- LOGIN -->
 <div class="login-wrap" id="loginWrap">
   <div class="login-box">
-    <h2>🔐 Middleman Login</h2>
-    <p>Enter the middleman password to access the dashboard.</p>
+    <h2>MM Login</h2>
+    <p>Enter the middleman password</p>
     <div class="err" id="loginErr"></div>
-    <div class="field">
-      <label>Password</label>
-      <input type="password" id="mmPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()" />
-    </div>
-    <button class="btn btn-purple" onclick="login()">Login</button>
+    <div class="field"><label>Password</label><input type="password" id="mmPw" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()"></div>
+    <button class="btn btn-primary" style="width:100%;padding:.7rem" onclick="login()">Login</button>
   </div>
 </div>
 
-<!-- DASHBOARD -->
 <div id="dashboard">
   <div class="dash-header">
-    <h1>Deposit Dashboard</h1>
-    <button class="refresh-btn" onclick="loadDeposits()">↻ Refresh</button>
+    <h1>Dashboard</h1>
+    <button class="btn btn-primary" onclick="load()" style="font-size:.8rem">↻ Refresh</button>
   </div>
-  <div class="dash-body">
+  <div class="body">
 
-    <!-- PENDING — player sent request, waiting for you to fill pet -->
-    <div class="section-title">⏳ Pending Requests <span class="count-badge" id="pendingCount">0</span></div>
-    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">
-      Player clicked Deposit and is trading their pet to you in PS99. Once you receive it, search the pet name below and click <strong style="color:var(--green)">Confirm</strong>.
-    </p>
-    <table class="deposit-table" id="pendingTable">
-      <thead><tr><th>Player</th><th>Requested</th><th>Pet Received (search & confirm)</th><th>Reject</th></tr></thead>
-      <tbody id="pendingBody"><tr><td colspan="4" style="color:var(--muted);padding:1rem">No pending requests</td></tr></tbody>
+    <div class="section-title">⏳ Pending Deposits <span class="count" id="pendCount">0</span></div>
+    <p style="color:var(--muted);font-size:.82rem;margin-bottom:1rem">Player traded their pet to you in PS99 — search the pet name and confirm.</p>
+    <table>
+      <thead><tr><th>Player</th><th>Requested</th><th>Pet Received</th><th>Reject</th></tr></thead>
+      <tbody id="pendBody"></tbody>
     </table>
 
-    <!-- CONFIRMED / IN FLIP -->
-    <div class="section-title">✅ Confirmed &amp; Active <span class="count-badge" id="activeCount">0</span></div>
-    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">These pets are confirmed and may be in a flip. No action needed unless returning.</p>
-    <table class="deposit-table" id="activeTable">
-      <thead><tr><th>Pet</th><th>Player</th><th>Status</th><th>Actions</th></tr></thead>
-      <tbody id="activeBody"><tr><td colspan="4" style="color:var(--muted);padding:1rem">None</td></tr></tbody>
-    </table>
-
-    <!-- WON — needs sending -->
-    <div class="section-title">🏆 Won — Needs Sending <span class="count-badge" id="wonCount">0</span></div>
-    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1rem">Trade the pet to these players in PS99, then click <strong style="color:var(--green)">Mark Sent</strong>.</p>
-    <table class="deposit-table" id="wonTable">
-      <thead><tr><th>Pet</th><th>Send To</th><th>Won At</th><th>Actions</th></tr></thead>
-      <tbody id="wonBody"><tr><td colspan="4" style="color:var(--muted);padding:1rem">No pending payouts</td></tr></tbody>
-    </table>
-
-    <!-- HISTORY -->
-    <div class="section-title">📋 Recent History</div>
-    <table class="deposit-table" id="historyTable">
-      <thead><tr><th>Pet</th><th>Player</th><th>Status</th><th>Time</th></tr></thead>
-      <tbody id="historyBody"><tr><td colspan="4" style="color:var(--muted);padding:1rem">No history yet</td></tr></tbody>
+    <div class="section-title">↩ Withdrawal Requests <span class="count" id="wdCount">0</span></div>
+    <p style="color:var(--muted);font-size:.82rem;margin-bottom:1rem">Trade the pet back to the player in PS99, then click Mark Sent.</p>
+    <table>
+      <thead><tr><th>Pet</th><th>Send To</th><th>Requested</th><th>Action</th></tr></thead>
+      <tbody id="wdBody"></tbody>
     </table>
 
   </div>
 </div>
 
 <script>
-  const API = 'https://spinzone99-production.up.railway.app';
-  let secret = '';
-  let rapList = [];
+const API = 'https://spinzone99-production.up.railway.app';
+let secret = '';
+let rapList = [];
 
-  // Load RAP list for autocomplete
-  async function loadRapList() {
-    try {
-      const res = await fetch('https://ps99.biggamesapi.io/api/rap');
-      const data = await res.json();
-      rapList = (data.data || []).filter(p => p.configData?.id).map(p => ({
-        name: p.configData.id,
-        value: p.value || 0,
-        image: `https://biggamesapi.io/image/${encodeURIComponent(p.configData.id)}`
-      }));
-    } catch {}
-  }
-  loadRapList();
+async function loadRAP() {
+  try {
+    const r = await fetch('https://ps99.biggamesapi.io/api/rap');
+    const d = await r.json();
+    rapList = (d.data || []).filter(p => p.configData?.id).map(p => ({
+      name: p.configData.id, value: p.value || 0,
+      image: `https://biggamesapi.io/image/${encodeURIComponent(p.configData.id)}`
+    }));
+  } catch {}
+}
+loadRAP();
 
-  function login() {
-    const pw = document.getElementById('mmPassword').value;
-    if (!pw) return;
-    secret = pw;
-    loadDeposits();
-  }
+async function login() {
+  secret = document.getElementById('mmPw').value;
+  if (!secret) return;
+  await load();
+}
 
-  function timeAgo(ts) {
-    const s = Math.floor((Date.now() - new Date(ts)) / 1000);
-    if (s < 60) return `${s}s ago`;
-    if (s < 3600) return `${Math.floor(s/60)}m ago`;
-    if (s < 86400) return `${Math.floor(s/3600)}h ago`;
-    return `${Math.floor(s/86400)}d ago`;
-  }
-
-  async function loadDeposits() {
-    try {
-      const res = await fetch(`${API}/api/admin/deposits`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ secret })
-      });
-      if (res.status === 403) {
-        const err = document.getElementById('loginErr');
-        err.style.display = 'block'; err.textContent = '❌ Wrong password';
-        return;
-      }
-      const deposits = await res.json();
-      document.getElementById('loginWrap').style.display = 'none';
-      document.getElementById('dashboard').style.display = 'block';
-      renderDeposits(deposits);
-    } catch {
-      const err = document.getElementById('loginErr');
-      err.style.display = 'block'; err.textContent = '❌ Could not connect to server';
-    }
-  }
-
-  function renderDeposits(deposits) {
-    const pending = deposits.filter(d => d.status === 'pending');
-    const active = deposits.filter(d => d.status === 'confirmed' || d.status === 'in_flip');
-    const won = deposits.filter(d => d.status === 'won');
-    const history = deposits.filter(d => d.status === 'returned' || d.status === 'sent').slice(-20).reverse();
-
-    document.getElementById('pendingCount').textContent = pending.length;
-    document.getElementById('activeCount').textContent = active.length;
-    document.getElementById('wonCount').textContent = won.length;
-
+async function load() {
+  try {
+    const [pr, wr] = await Promise.all([
+      fetch(`${API}/api/mm/pending`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ secret }) }),
+      fetch(`${API}/api/mm/withdrawals`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ secret }) })
+    ]);
+    if (pr.status === 403) { const e = document.getElementById('loginErr'); e.style.display='block'; e.textContent='❌ Wrong password'; return; }
+    const pending = await pr.json();
+    const withdrawals = await wr.json();
+    document.getElementById('loginWrap').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
     renderPending(pending);
-    renderActive(active);
-    renderWon(won);
-    renderHistory(history);
-  }
+    renderWithdrawals(withdrawals);
+  } catch { alert('❌ Could not connect'); }
+}
 
-  function petCell(d) {
-    return `<div class="pet-cell">
-      ${d.petImage ? `<img src="${d.petImage}" onerror="this.style.display='none'" alt="" />` : ''}
-      <div><div class="pname">${d.petName}</div><div class="pval">${d.petValue > 0 ? d.petValue.toLocaleString() + ' RAP' : ''}</div></div>
-    </div>`;
-  }
+function timeAgo(ts) {
+  const s = Math.floor((Date.now() - new Date(ts)) / 1000);
+  if (s < 60) return s + 's ago';
+  if (s < 3600) return Math.floor(s/60) + 'm ago';
+  return Math.floor(s/3600) + 'h ago';
+}
 
-  // Per-row state for fill inputs
-  const fillInputTimers = {};
-  const fillSelected = {}; // depositId -> { name, value, image }
+const selected = {}; // itemId -> { name, value, image }
 
-  function renderPending(deposits) {
-    const tbody = document.getElementById('pendingBody');
-    if (deposits.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);padding:1rem">No pending requests 🎉</td></tr>';
-      return;
-    }
-    tbody.innerHTML = deposits.map(d => {
-      const did = d._id || d.id;
-      return `<tr id="pendingRow_${did}">
-        <td><strong>@${d.username}</strong></td>
-        <td><span class="time-ago">${timeAgo(d.createdAt)}</span></td>
-        <td>
-          <div class="fill-pet-wrap">
-            <div class="ac-wrap">
-              <input type="text" id="fillInput_${did}" placeholder="Search pet name…"
-                oninput="onFillInput('${did}')" autocomplete="off" />
-              <div class="ac-dropdown" id="fillDrop_${did}"></div>
-            </div>
-            <span class="fill-preview" id="fillPreview_${did}"></span>
-            <button class="btn btn-green" onclick="fillAndConfirm('${did}')">✓ Confirm</button>
+function renderPending(items) {
+  const tbody = document.getElementById('pendBody');
+  document.getElementById('pendCount').textContent = items.length;
+  if (items.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);padding:1rem">No pending deposits 🎉</td></tr>'; return; }
+  tbody.innerHTML = items.map(i => {
+    const id = i._id || i.id;
+    return `<tr id="row_${id}">
+      <td><strong>@${i.ownerName}</strong></td>
+      <td><span class="time">${timeAgo(i.createdAt)}</span></td>
+      <td>
+        <div class="actions">
+          <div class="pet-search-wrap">
+            <input type="text" id="inp_${id}" placeholder="Search pet…" oninput="onSearch('${id}')" autocomplete="off">
+            <div class="drop" id="drop_${id}"></div>
           </div>
-        </td>
-        <td>
-          <button class="btn btn-red" onclick="rejectDeposit('${did}')">✗ Reject</button>
-        </td>
-      </tr>`;
-    }).join('');
-  }
+          <span class="preview-val" id="prev_${id}"></span>
+          <button class="btn btn-green" onclick="confirmDeposit('${id}')">✓ Confirm</button>
+        </div>
+      </td>
+      <td><button class="btn btn-red" onclick="rejectDeposit('${id}')">✗</button></td>
+    </tr>`;
+  }).join('');
+}
 
-  function onFillInput(depositId) {
-    clearTimeout(fillInputTimers[depositId]);
-    fillSelected[depositId] = null;
-    const input = document.getElementById(`fillInput_${depositId}`);
-    const drop = document.getElementById(`fillDrop_${depositId}`);
-    const preview = document.getElementById(`fillPreview_${depositId}`);
-    const q = input.value.trim().toLowerCase();
-    preview.textContent = '';
+function onSearch(id) {
+  const q = document.getElementById(`inp_${id}`).value.trim().toLowerCase();
+  const drop = document.getElementById(`drop_${id}`);
+  selected[id] = null;
+  document.getElementById(`prev_${id}`).textContent = '';
+  if (!q) { drop.classList.remove('open'); return; }
+  const matches = rapList.filter(p => p.name.toLowerCase().includes(q)).slice(0, 8);
+  if (matches.length) {
+    drop.innerHTML = matches.map(p =>
+      `<div class="drop-item" onmousedown="pickPet('${id}','${p.name.replace(/'/g,"\\'")}',${p.value},'${p.image}')">
+        <img src="${p.image}" onerror="this.style.display='none'" alt="">
+        <span>${p.name}</span><span class="dval">${p.value.toLocaleString()}</span>
+      </div>`
+    ).join('');
+    drop.classList.add('open');
+  } else drop.classList.remove('open');
+}
 
-    if (!q) { drop.classList.remove('open'); return; }
+function pickPet(id, name, value, image) {
+  selected[id] = { name, value, image };
+  document.getElementById(`inp_${id}`).value = name;
+  document.getElementById(`drop_${id}`).classList.remove('open');
+  document.getElementById(`prev_${id}`).textContent = value.toLocaleString() + ' RAP';
+}
 
-    const matches = rapList.filter(p => p.name.toLowerCase().includes(q)).slice(0, 8);
-    if (matches.length > 0) {
-      drop.innerHTML = matches.map(p =>
-        `<div class="ac-item" onmousedown="selectFillPet('${depositId}', '${p.name.replace(/'/g,"\\'")}', ${p.value}, '${p.image}')">
-          <img src="${p.image}" onerror="this.style.display='none'" alt="" />
-          <span>${p.name}</span>
-          <span class="ac-val">${p.value.toLocaleString()}</span>
-        </div>`
-      ).join('');
-      drop.classList.add('open');
-    } else {
-      drop.classList.remove('open');
-    }
-  }
-
-  function selectFillPet(depositId, name, value, image) {
-    fillSelected[depositId] = { name, value, image };
-    const input = document.getElementById(`fillInput_${depositId}`);
-    const drop = document.getElementById(`fillDrop_${depositId}`);
-    const preview = document.getElementById(`fillPreview_${depositId}`);
-    if (input) input.value = name;
-    drop.classList.remove('open');
-    preview.textContent = `${value.toLocaleString()} RAP`;
-  }
-
-  async function fillAndConfirm(depositId) {
-    const selected = fillSelected[depositId];
-    const inputVal = document.getElementById(`fillInput_${depositId}`)?.value?.trim();
-    const petName = selected?.name || inputVal;
-
-    if (!petName) { alert('❌ Search and select a pet first.'); return; }
-
-    const res = await fetch(`${API}/api/admin/deposits/fill`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret, depositId, petName })
-    });
-    const data = await res.json();
-    if (res.ok) {
-      // Remove row immediately for snappy feel
-      document.getElementById(`pendingRow_${depositId}`)?.remove();
-      loadDeposits();
-    } else {
-      alert('❌ ' + data.error);
-    }
-  }
-
-  async function rejectDeposit(depositId) {
-    if (!confirm('Reject and cancel this deposit request?')) return;
-    const res = await fetch(`${API}/api/admin/deposits/return`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret, depositId })
-    });
-    const data = await res.json();
-    if (res.ok) loadDeposits();
-    else alert('❌ ' + data.error);
-  }
-
-  function renderActive(deposits) {
-    const tbody = document.getElementById('activeBody');
-    if (deposits.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);padding:1rem">None active</td></tr>'; return; }
-    tbody.innerHTML = deposits.map(d => {
-      const did = d._id || d.id;
-      return `<tr>
-        <td>${petCell(d)}</td>
-        <td><strong>@${d.username}</strong></td>
-        <td><span class="status-pill sp-${d.status}">${d.status === 'in_flip' ? '🪙 In Flip' : '✅ Confirmed'}</span></td>
-        <td>
-          <button class="btn btn-red" onclick="returnDeposit('${did}')">↩ Return</button>
-        </td>
-      </tr>`;
-    }).join('');
-  }
-
-  function renderWon(deposits) {
-    const tbody = document.getElementById('wonBody');
-    if (deposits.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);padding:1rem">No pending payouts 🎉</td></tr>'; return; }
-    tbody.innerHTML = deposits.map(d => {
-      const did = d._id || d.id;
-      return `<tr>
-        <td>${petCell(d)}</td>
-        <td><strong style="color:var(--green)">@${d.username}</strong></td>
-        <td><span class="time-ago">${timeAgo(d.createdAt)}</span></td>
-        <td>
-          <button class="btn btn-green" onclick="markSent('${did}')">✓ Sent to Winner</button>
-        </td>
-      </tr>`;
-    }).join('');
-  }
-
-  function renderHistory(deposits) {
-    const tbody = document.getElementById('historyBody');
-    if (deposits.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);padding:1rem">No history yet</td></tr>'; return; }
-    tbody.innerHTML = deposits.map(d => `
-      <tr>
-        <td>${petCell(d)}</td>
-        <td>@${d.username}</td>
-        <td><span class="status-pill sp-${d.status}">${d.status}</span></td>
-        <td><span class="time-ago">${timeAgo(d.createdAt)}</span></td>
-      </tr>`).join('');
-  }
-
-  async function returnDeposit(id) {
-    if (!confirm('Mark this deposit as returned?')) return;
-    const res = await fetch(`${API}/api/admin/deposits/return`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret, depositId: id })
-    });
-    const data = await res.json();
-    if (res.ok) loadDeposits();
-    else alert('❌ ' + data.error);
-  }
-
-  async function markSent(id) {
-    const res = await fetch(`${API}/api/admin/deposits/sent`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret, depositId: id })
-    });
-    const data = await res.json();
-    if (res.ok) loadDeposits();
-    else alert('❌ ' + data.error);
-  }
-
-  // Close dropdowns on outside click
-  document.addEventListener('click', e => {
-    if (!e.target.closest('.ac-wrap')) {
-      document.querySelectorAll('.ac-dropdown').forEach(d => d.classList.remove('open'));
-    }
+async function confirmDeposit(id) {
+  const s = selected[id];
+  const name = s?.name || document.getElementById(`inp_${id}`)?.value?.trim();
+  if (!name) { alert('Search and select a pet first'); return; }
+  const r = await fetch(`${API}/api/mm/confirm`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ secret, itemId: id, petName: name })
   });
+  const d = await r.json();
+  if (r.ok) { document.getElementById(`row_${id}`)?.remove(); alert('✅ ' + d.message); load(); }
+  else alert('❌ ' + d.error);
+}
 
-  // Auto-refresh every 10s
-  setInterval(() => { if (secret) loadDeposits(); }, 10000);
+async function rejectDeposit(id) {
+  if (!confirm('Reject this deposit?')) return;
+  const r = await fetch(`${API}/api/mm/reject`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ secret, itemId: id })
+  });
+  const d = await r.json();
+  if (r.ok) load(); else alert('❌ ' + d.error);
+}
+
+function renderWithdrawals(items) {
+  const tbody = document.getElementById('wdBody');
+  document.getElementById('wdCount').textContent = items.length;
+  if (items.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);padding:1rem">No withdrawals 🎉</td></tr>'; return; }
+  tbody.innerHTML = items.map(i => {
+    const id = i._id || i.id;
+    return `<tr>
+      <td><div class="pet-cell">
+        ${i.petImage ? `<img src="${i.petImage}" onerror="this.style.display='none'" alt="">` : ''}
+        <div><div class="pet-name">${i.petName}</div><div class="pet-val">${i.petValue.toLocaleString()} RAP</div></div>
+      </div></td>
+      <td><strong style="color:var(--green)">@${i.ownerName}</strong></td>
+      <td><span class="time">${timeAgo(i.createdAt)}</span></td>
+      <td><button class="btn btn-green" onclick="markSent('${id}')">✓ Sent</button></td>
+    </tr>`;
+  }).join('');
+}
+
+async function markSent(id) {
+  const r = await fetch(`${API}/api/mm/sent`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ secret, itemId: id })
+  });
+  const d = await r.json();
+  if (r.ok) load(); else alert('❌ ' + d.error);
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.pet-search-wrap')) document.querySelectorAll('.drop').forEach(d => d.classList.remove('open'));
+});
+
+setInterval(() => { if (secret) load(); }, 15000);
 </script>
 </body>
 </html>

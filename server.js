@@ -1,5 +1,4 @@
 require('dotenv').config();
-
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
@@ -14,479 +13,322 @@ const wss = new WebSocketServer({ server });
 
 const PORT = process.env.PORT || 3000;
 const SECRET = process.env.JWT_SECRET || 'spinzone_secret_key';
-const MIDDLEMAN_SECRET = process.env.MIDDLEMAN_SECRET || 'middleman_admin_pass';
-const MIDDLEMAN_ROBLOX = 'SpinZone99';
+const MM_SECRET = process.env.MIDDLEMAN_SECRET || 'middleman_admin_pass';
+const MM_ROBLOX = 'SpinZone99';
 const MONGO_URI = process.env.MONGO_URI;
 
-// ---- MONGODB CONNECTION ----
 mongoose.connect(MONGO_URI)
-  .then(() => console.log('✅ Connected to MongoDB'))
-  .catch(err => { console.error('❌ MongoDB connection error:', err); process.exit(1); });
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => { console.error('❌ MongoDB error:', err); process.exit(1); });
 
-// ---- SCHEMAS ----
-const userSchema = new mongoose.Schema({
+// ── SCHEMAS ──────────────────────────────────────────────
+const User = mongoose.model('User', new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   robloxUsername: { type: String, default: null },
-  robloxId: { type: String, default: null },
-  createdAt: { type: Date, default: Date.now },
-});
+  createdAt: { type: Date, default: Date.now }
+}));
 
-const depositSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  username: { type: String, required: true },
-  petName: { type: String, required: true },
-  petValue: { type: Number, required: true },
-  petImage: { type: String },
-  status: { type: String, enum: ['pending', 'confirmed', 'in_flip', 'won', 'returned', 'sent', 'cancelled'], default: 'pending' },
-  createdAt: { type: Date, default: Date.now },
-});
+// Each item in a player's site inventory
+const Item = mongoose.model('Item', new mongoose.Schema({
+  ownerId:   { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  ownerName: { type: String, required: true },
+  petName:   { type: String, required: true },
+  petValue:  { type: Number, required: true },
+  petImage:  { type: String, default: '' },
+  // pending = waiting for middleman to confirm deposit
+  // available = in inventory, can be used in flips
+  // in_flip = currently in an active flip
+  // withdraw_requested = player wants to withdraw
+  // withdrawn = middleman sent it back
+  status: { type: String, enum: ['pending','available','in_flip','withdraw_requested','withdrawn'], default: 'pending' },
+  createdAt: { type: Date, default: Date.now }
+}));
 
-const flipSchema = new mongoose.Schema({
-  creatorDepositId: { type: mongoose.Schema.Types.ObjectId, ref: 'Deposit', required: true },
-  joinerDepositId: { type: mongoose.Schema.Types.ObjectId, ref: 'Deposit', default: null },
-  status: { type: String, enum: ['waiting', 'active', 'done', 'cancelled'], default: 'waiting' },
-  winnerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
-  winnerUsername: { type: String, default: null },
-  finishedAt: { type: Date, default: null },
+const Flip = mongoose.model('Flip', new mongoose.Schema({
+  creatorId:   { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  creatorName: { type: String, required: true },
+  creatorItemId: { type: mongoose.Schema.Types.ObjectId, ref: 'Item', required: true },
+  creatorPetName:  { type: String, required: true },
+  creatorPetValue: { type: Number, required: true },
+  creatorPetImage: { type: String, default: '' },
+  joinerId:   { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  joinerName: { type: String, default: null },
+  joinerItemId: { type: mongoose.Schema.Types.ObjectId, ref: 'Item', default: null },
+  joinerPetName:  { type: String, default: null },
+  joinerPetValue: { type: Number, default: null },
+  joinerPetImage: { type: String, default: '' },
+  status: { type: String, enum: ['waiting','done','cancelled'], default: 'waiting' },
+  winnerId:   { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  winnerName: { type: String, default: null },
   createdAt: { type: Date, default: Date.now },
-});
+  finishedAt: { type: Date, default: null }
+}));
 
-const verificationSchema = new mongoose.Schema({
+const Verification = mongoose.model('Verification', new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
-  code: { type: String, required: true },
-  robloxUsername: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now, expires: 600 }, // auto-delete after 10 minutes
-});
-
-const User = mongoose.model('User', userSchema);
-const Deposit = mongoose.model('Deposit', depositSchema);
-const Flip = mongoose.model('Flip', flipSchema);
-const Verification = mongoose.model('Verification', verificationSchema);
+  code: String,
+  robloxUsername: String,
+  createdAt: { type: Date, default: Date.now, expires: 600 }
+}));
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static('.'));
 
-// ---- RAP CACHE ----
-let rapCache = null;
-let rapCacheTime = 0;
-
+// ── RAP CACHE ────────────────────────────────────────────
+let rapCache = null, rapCacheTime = 0;
 async function getRAP() {
-  const now = Date.now();
-  if (rapCache && now - rapCacheTime < 4 * 60 * 60 * 1000) return rapCache;
+  if (rapCache && Date.now() - rapCacheTime < 4 * 3600 * 1000) return rapCache;
   try {
-    const res = await fetch('https://ps99.biggamesapi.io/api/rap', {
-      headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' }
-    });
-    const data = await res.json();
-    rapCache = data.data || [];
-    rapCacheTime = now;
+    const r = await fetch('https://ps99.biggamesapi.io/api/rap', { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    const d = await r.json();
+    rapCache = d.data || []; rapCacheTime = Date.now();
     return rapCache;
-  } catch (e) {
-    console.error('Failed to fetch RAP:', e);
-    return rapCache || [];
-  }
+  } catch { return rapCache || []; }
 }
 getRAP();
 
-// ---- PET HELPERS ----
-function normalize(str) {
-  return str.toLowerCase().replace(/[^a-z0-9]/g, '');
-}
 function findPet(rap, name) {
-  const exact = name.toLowerCase().trim();
-  const fuzzy = normalize(name);
+  const q = name.toLowerCase().replace(/[^a-z0-9]/g,'');
   return rap.find(p => {
-    const id = p.configData?.id;
-    if (!id) return false;
-    return id.toLowerCase() === exact || normalize(id) === fuzzy;
+    const id = p.configData?.id; if (!id) return false;
+    return id.toLowerCase() === name.toLowerCase().trim() || id.toLowerCase().replace(/[^a-z0-9]/g,'') === q;
   });
 }
-function petImageUrl(petName) {
-  return `https://biggamesapi.io/image/${encodeURIComponent(petName)}`;
-}
+function petImg(name) { return `https://biggamesapi.io/image/${encodeURIComponent(name)}`; }
 
-// ---- WEBSOCKET ----
+// ── WEBSOCKET ─────────────────────────────────────────────
 const clients = new Set();
-wss.on('connection', async (ws) => {
+wss.on('connection', async ws => {
   clients.add(ws);
-  ws.send(JSON.stringify({ type: 'deposits', deposits: await getPublicDeposits() }));
-  ws.send(JSON.stringify({ type: 'flips', flips: await getPublicFlips() }));
+  ws.send(JSON.stringify({ type: 'init', flips: await publicFlips() }));
   ws.on('close', () => clients.delete(ws));
 });
-
 function broadcast(data) {
   const msg = JSON.stringify(data);
-  for (const client of clients) {
-    if (client.readyState === 1) client.send(msg);
-  }
+  for (const c of clients) if (c.readyState === 1) c.send(msg);
 }
-
-async function getPublicDeposits() {
-  const deps = await Deposit.find({ status: { $in: ['confirmed', 'pending'] } }).lean();
-  return deps.map(d => ({
-    id: d._id.toString(),
-    userId: d.userId.toString(),
-    username: d.username,
-    petName: d.petName,
-    petValue: d.petValue,
-    petImage: d.petImage,
-    status: d.status,
-    createdAt: d.createdAt,
-  }));
-}
-
-async function getPublicFlips() {
-  const cutoff = new Date(Date.now() - 15000);
-  const flips = await Flip.find({
-    $or: [
-      { status: { $ne: 'done' } },
-      { status: 'done', finishedAt: { $gte: cutoff } }
-    ]
+async function publicFlips() {
+  const cutoff = new Date(Date.now() - 12000);
+  return Flip.find({
+    $or: [{ status: 'waiting' }, { status: 'done', finishedAt: { $gte: cutoff } }]
   }).lean();
-
-  return await Promise.all(flips.map(async f => {
-    const cd = f.creatorDepositId ? await Deposit.findById(f.creatorDepositId).lean() : null;
-    const jd = f.joinerDepositId ? await Deposit.findById(f.joinerDepositId).lean() : null;
-    return {
-      id: f._id.toString(),
-      status: f.status,
-      creator: cd ? { username: cd.username, petName: cd.petName, petValue: cd.petValue, petImage: cd.petImage } : null,
-      joiner: jd ? { username: jd.username, petName: jd.petName, petValue: jd.petValue, petImage: jd.petImage } : null,
-      winnerId: f.winnerId?.toString() || null,
-      winnerUsername: f.winnerUsername || null,
-      finishedAt: f.finishedAt || null,
-    };
-  }));
 }
 
-// ---- JWT MIDDLEWARE ----
-function authenticateToken(req, res, next) {
-  const authHeader = req.headers.authorization;
-  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
-  if (!token) return res.status(401).json({ error: 'Not logged in' });
-  try {
-    req.user = jwt.verify(token, SECRET);
-    next();
-  } catch {
-    res.status(401).json({ error: 'Invalid or expired token' });
-  }
+// ── AUTH MIDDLEWARE ───────────────────────────────────────
+function auth(req, res, next) {
+  const t = req.headers.authorization?.replace('Bearer ', '');
+  if (!t) return res.status(401).json({ error: 'Not logged in' });
+  try { req.user = jwt.verify(t, SECRET); next(); }
+  catch { res.status(401).json({ error: 'Invalid token' }); }
 }
 
-// ---- AUTH ROUTES ----
-app.get('/api/test', (req, res) => res.json({ message: 'SpinZone server is running!' }));
-
+// ── AUTH ROUTES ───────────────────────────────────────────
 app.post('/api/register', async (req, res) => {
   const { username, password } = req.body;
-  if (!username || !password) return res.status(400).json({ error: 'Username and password are required' });
-  const existing = await User.findOne({ username });
-  if (existing) return res.status(400).json({ error: 'Username already taken' });
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const user = await User.create({ username, password: hashedPassword });
-  res.json({ message: 'Account created successfully!' });
+  if (!username || !password) return res.status(400).json({ error: 'Fill in all fields' });
+  if (await User.findOne({ username })) return res.status(400).json({ error: 'Username taken' });
+  const user = await User.create({ username, password: await bcrypt.hash(password, 10) });
+  res.json({ message: 'Account created!' });
 });
 
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
-  if (!username || !password) return res.status(400).json({ error: 'Username and password are required' });
   const user = await User.findOne({ username });
-  if (!user) return res.status(400).json({ error: 'User not found' });
-  const valid = await bcrypt.compare(password, user.password);
-  if (!valid) return res.status(400).json({ error: 'Incorrect password' });
+  if (!user || !await bcrypt.compare(password, user.password)) return res.status(400).json({ error: 'Wrong username or password' });
   const token = jwt.sign({ id: user._id.toString(), username: user.username }, SECRET, { expiresIn: '7d' });
   res.json({ token, username: user.username });
 });
 
-app.get('/api/profile', authenticateToken, async (req, res) => {
-  const user = await User.findById(req.user.id).lean();
-  if (!user) return res.status(404).json({ error: 'User not found' });
-  const myDeposits = await Deposit.find({ userId: req.user.id }).lean();
-  res.json({
-    username: user.username,
-    robloxUsername: user.robloxUsername || null,
-    robloxId: user.robloxId || null,
-    deposits: myDeposits,
-  });
-});
-
-// ---- ROBLOX VERIFY ----
-app.post('/api/roblox/generate-code', authenticateToken, async (req, res) => {
+// ── ROBLOX VERIFY ─────────────────────────────────────────
+app.post('/api/roblox/generate-code', auth, async (req, res) => {
   const { code, robloxUsername } = req.body;
-  if (!code || !robloxUsername) return res.status(400).json({ error: 'Missing fields' });
-  await Verification.findOneAndUpdate(
-    { userId: req.user.id },
-    { userId: req.user.id, code, robloxUsername },
-    { upsert: true, new: true }
-  );
+  await Verification.findOneAndUpdate({ userId: req.user.id }, { userId: req.user.id, code, robloxUsername }, { upsert: true });
   res.json({ message: 'Code saved' });
 });
 
-app.post('/api/roblox/verify', authenticateToken, async (req, res) => {
+app.post('/api/roblox/verify', auth, async (req, res) => {
   const { robloxUsername, code } = req.body;
   const pending = await Verification.findOne({ userId: req.user.id });
-  if (!pending || pending.code !== code) return res.status(400).json({ error: 'Invalid or expired code.' });
+  if (!pending || pending.code !== code) return res.status(400).json({ error: 'Invalid or expired code' });
   try {
-    const searchRes = await fetch('https://users.roblox.com/v1/usernames/users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' },
+    const sr = await fetch('https://users.roblox.com/v1/usernames/users', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ usernames: [robloxUsername], excludeBannedUsers: true })
     });
-    const searchData = await searchRes.json();
-    if (!searchData.data || searchData.data.length === 0) return res.status(400).json({ error: 'Roblox username not found.' });
-    const robloxId = searchData.data[0].id;
-    const profileRes = await fetch(`https://users.roblox.com/v1/users/${robloxId}`, {
-      headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' }
-    });
-    const profileData = await profileRes.json();
-    if (!(profileData.description || '').includes(code)) return res.status(400).json({ error: 'Code not found in your Roblox profile description.' });
-    await User.findByIdAndUpdate(req.user.id, { robloxUsername, robloxId: robloxId.toString() });
+    const sd = await sr.json();
+    if (!sd.data?.length) return res.status(400).json({ error: 'Roblox username not found' });
+    const rid = sd.data[0].id;
+    const pr = await fetch(`https://users.roblox.com/v1/users/${rid}`);
+    const pd = await pr.json();
+    if (!(pd.description || '').includes(code)) return res.status(400).json({ error: 'Code not found in your Roblox profile description' });
+    await User.findByIdAndUpdate(req.user.id, { robloxUsername });
     await Verification.deleteOne({ userId: req.user.id });
-    res.json({ message: 'Roblox account verified!', robloxUsername, robloxId });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to reach Roblox API.' });
-  }
+    res.json({ message: 'Verified!', robloxUsername });
+  } catch { res.status(500).json({ error: 'Could not reach Roblox API' }); }
 });
 
-// ---- PET VALUE LOOKUP ----
-app.get('/api/pet-value', async (req, res) => {
-  const { name } = req.query;
-  if (!name) return res.status(400).json({ error: 'Pet name required' });
-  const rap = await getRAP();
-  const match = findPet(rap, name);
-  if (!match) return res.status(404).json({ error: 'Pet not found. Check the name and try again.' });
-  res.json({ name: match.configData.id, value: match.value || 0, image: petImageUrl(match.configData.id) });
+// ── INVENTORY ─────────────────────────────────────────────
+// Get my inventory
+app.get('/api/inventory', auth, async (req, res) => {
+  const items = await Item.find({ ownerId: req.user.id, status: { $ne: 'withdrawn' } }).lean();
+  res.json(items.map(i => ({ ...i, id: i._id.toString() })));
 });
 
-// ---- DEPOSIT ROUTES ----
+// Request deposit (no pet name — middleman fills it in)
+app.post('/api/inventory/deposit', auth, async (req, res) => {
+  const existing = await Item.findOne({ ownerId: req.user.id, status: 'pending' });
+  if (existing) return res.status(400).json({ error: 'You already have a pending deposit. Wait for it to be confirmed.' });
+  const item = await Item.create({ ownerId: req.user.id, ownerName: req.user.username, petName: 'Pending...', petValue: 0, status: 'pending' });
+  broadcast({ type: 'inventory_update' });
+  res.json({ message: `Trade your pet to ${MM_ROBLOX} in PS99. The middleman will confirm it shortly!`, item: { ...item.toObject(), id: item._id.toString() } });
+});
 
-// Player just clicks "Request Deposit" — no pet name needed yet
-app.post('/api/deposits/request', authenticateToken, async (req, res) => {
-  const existing = await Deposit.findOne({ userId: req.user.id, status: { $in: ['pending', 'confirmed', 'in_flip'] } });
-  if (existing) return res.status(400).json({ error: 'You already have an active deposit. Wait for it to be resolved first.' });
+// Request withdrawal
+app.post('/api/inventory/withdraw', auth, async (req, res) => {
+  const { itemId } = req.body;
+  const item = await Item.findOne({ _id: itemId, ownerId: req.user.id, status: 'available' });
+  if (!item) return res.status(404).json({ error: 'Item not found or not available' });
+  item.status = 'withdraw_requested';
+  await item.save();
+  broadcast({ type: 'inventory_update' });
+  res.json({ message: `Withdrawal requested! ${MM_ROBLOX} will trade your ${item.petName} back to you in PS99.` });
+});
 
-  const deposit = await Deposit.create({
-    userId: req.user.id,
-    username: req.user.username,
-    petName: 'Pending',
-    petValue: 0,
-    petImage: '',
-    status: 'pending',
+// ── FLIP ROUTES ───────────────────────────────────────────
+// Create a flip with one of your items
+app.post('/api/flips/create', auth, async (req, res) => {
+  const { itemId } = req.body;
+  const item = await Item.findOne({ _id: itemId, ownerId: req.user.id, status: 'available' });
+  if (!item) return res.status(404).json({ error: 'Item not found or not available' });
+  item.status = 'in_flip';
+  await item.save();
+  const flip = await Flip.create({
+    creatorId: req.user.id, creatorName: req.user.username,
+    creatorItemId: item._id, creatorPetName: item.petName,
+    creatorPetValue: item.petValue, creatorPetImage: item.petImage
   });
-
-  broadcast({ type: 'deposits', deposits: await getPublicDeposits() });
-  res.json({
-    message: 'Deposit request created!',
-    deposit: { ...deposit.toObject(), id: deposit._id.toString() },
-    instructions: `Now trade your pet to "${MIDDLEMAN_ROBLOX}" in PS99. The middleman will confirm and fill in your pet details.`
-  });
-});
-
-// Middleman fills in the pet for a pending deposit
-app.post('/api/admin/deposits/fill', async (req, res) => {
-  const { secret, depositId, petName } = req.body;
-  if (secret !== MIDDLEMAN_SECRET) return res.status(403).json({ error: 'Forbidden' });
-  if (!depositId || !petName) return res.status(400).json({ error: 'depositId and petName required' });
-
-  const deposit = await Deposit.findById(depositId);
-  if (!deposit) return res.status(404).json({ error: 'Deposit not found.' });
-  if (deposit.status !== 'pending') return res.status(400).json({ error: 'Deposit is not pending.' });
-
-  const rap = await getRAP();
-  const match = findPet(rap, petName);
-  if (!match) return res.status(404).json({ error: `Pet "${petName}" not found in PS99 RAP data.` });
-  if (!match.value || match.value === 0) return res.status(400).json({ error: 'This pet has no RAP value.' });
-
-  deposit.petName = match.configData.id;
-  deposit.petValue = match.value;
-  deposit.petImage = petImageUrl(match.configData.id);
-  deposit.status = 'confirmed';
-  await deposit.save();
-
-  broadcast({ type: 'deposits', deposits: await getPublicDeposits() });
-  broadcast({ type: 'deposit_confirmed', depositId: deposit._id.toString(), username: deposit.username, petName: deposit.petName });
-  res.json({ message: `Confirmed deposit for ${deposit.username} — ${deposit.petName} (${deposit.petValue.toLocaleString()} RAP)`, deposit: { ...deposit.toObject(), id: deposit._id.toString() } });
-});
-
-app.get('/api/deposits/mine', authenticateToken, async (req, res) => {
-  const mine = await Deposit.find({ userId: req.user.id }).lean();
-  res.json(mine.map(d => ({ ...d, id: d._id.toString() })));
-});
-
-app.post('/api/deposits/cancel', authenticateToken, async (req, res) => {
-  const { depositId } = req.body;
-  const deposit = await Deposit.findOne({ _id: depositId, userId: req.user.id });
-  if (!deposit) return res.status(404).json({ error: 'Deposit not found.' });
-  if (deposit.status !== 'pending') return res.status(400).json({ error: 'Can only cancel pending deposits.' });
-  deposit.status = 'returned';
-  await deposit.save();
-  broadcast({ type: 'deposits', deposits: await getPublicDeposits() });
-  res.json({ message: 'Deposit cancelled.' });
-});
-
-// ---- FLIP ROUTES ----
-app.post('/api/flips/create', authenticateToken, async (req, res) => {
-  const { depositId } = req.body;
-  const deposit = await Deposit.findOne({ _id: depositId, userId: req.user.id, status: 'confirmed' });
-  if (!deposit) return res.status(404).json({ error: 'Confirmed deposit not found.' });
-
-  const existingFlip = await Flip.findOne({ creatorDepositId: depositId, status: 'waiting' });
-  if (existingFlip) return res.status(400).json({ error: 'This deposit is already in a flip.' });
-
-  const flip = await Flip.create({ creatorDepositId: depositId, status: 'waiting' });
-  deposit.status = 'in_flip';
-  await deposit.save();
-
-  broadcast({ type: 'deposits', deposits: await getPublicDeposits() });
-  broadcast({ type: 'flips', flips: await getPublicFlips() });
+  broadcast({ type: 'flips', flips: await publicFlips() });
   res.json({ message: 'Flip created!', flip: { ...flip.toObject(), id: flip._id.toString() } });
 });
 
-app.post('/api/flips/join', authenticateToken, async (req, res) => {
-  const { flipId, depositId } = req.body;
-
+// Join a flip
+app.post('/api/flips/join', auth, async (req, res) => {
+  const { flipId, itemId } = req.body;
   const flip = await Flip.findById(flipId);
-  if (!flip) return res.status(404).json({ error: 'Flip not found.' });
-  if (flip.status !== 'waiting') return res.status(400).json({ error: 'Flip no longer available.' });
+  if (!flip || flip.status !== 'waiting') return res.status(400).json({ error: 'Flip not available' });
+  if (flip.creatorId.toString() === req.user.id) return res.status(400).json({ error: 'Cannot join your own flip' });
 
-  const creatorDeposit = await Deposit.findById(flip.creatorDepositId);
-  if (creatorDeposit?.userId.toString() === req.user.id) return res.status(400).json({ error: 'Cannot join your own flip.' });
+  const item = await Item.findOne({ _id: itemId, ownerId: req.user.id, status: 'available' });
+  if (!item) return res.status(404).json({ error: 'Item not found or not available' });
 
-  const joinerDeposit = await Deposit.findOne({ _id: depositId, userId: req.user.id, status: 'confirmed' });
-  if (!joinerDeposit) return res.status(404).json({ error: 'Confirmed deposit not found.' });
+  const min = flip.creatorPetValue * 0.9, max = flip.creatorPetValue * 1.1;
+  if (item.petValue < min || item.petValue > max) return res.status(400).json({
+    error: `Your pet value must be within 10% of ${flip.creatorPetValue.toLocaleString()} RAP (${Math.floor(min).toLocaleString()} – ${Math.ceil(max).toLocaleString()})`
+  });
 
-  const minValue = creatorDeposit.petValue * 0.9;
-  const maxValue = creatorDeposit.petValue * 1.1;
-  if (joinerDeposit.petValue < minValue || joinerDeposit.petValue > maxValue) {
-    return res.status(400).json({
-      error: `Your pet value (${joinerDeposit.petValue.toLocaleString()}) must be within 10% of ${creatorDeposit.petValue.toLocaleString()}. Range: ${Math.floor(minValue).toLocaleString()} – ${Math.ceil(maxValue).toLocaleString()}.`
-    });
-  }
+  item.status = 'in_flip';
+  await item.save();
 
   const creatorWins = Math.random() < 0.5;
-  const winnerDeposit = creatorWins ? creatorDeposit : joinerDeposit;
-  const loserDeposit = creatorWins ? joinerDeposit : creatorDeposit;
+  const winnerId = creatorWins ? flip.creatorId : req.user.id;
+  const winnerName = creatorWins ? flip.creatorName : req.user.username;
+  const loserId = creatorWins ? req.user.id : flip.creatorId;
 
-  flip.status = 'done';
-  flip.joinerDepositId = depositId;
-  flip.winnerId = winnerDeposit.userId;
-  flip.winnerUsername = winnerDeposit.username;
+  flip.joinerId = req.user.id; flip.joinerName = req.user.username;
+  flip.joinerItemId = item._id; flip.joinerPetName = item.petName;
+  flip.joinerPetValue = item.petValue; flip.joinerPetImage = item.petImage;
+  flip.status = 'done'; flip.winnerId = winnerId; flip.winnerName = winnerName;
   flip.finishedAt = new Date();
   await flip.save();
 
-  // Both pets transfer to the winner as confirmed deposits (ready to flip again)
-  creatorDeposit.status = 'confirmed';
-  creatorDeposit.userId = winnerDeposit.userId;
-  creatorDeposit.username = winnerDeposit.username;
-  await creatorDeposit.save();
+  // Both items go to winner as available
+  await Item.updateMany(
+    { _id: { $in: [flip.creatorItemId, item._id] } },
+    { $set: { ownerId: winnerId, ownerName: winnerName, status: 'available' } }
+  );
 
-  joinerDeposit.status = 'confirmed';
-  joinerDeposit.userId = winnerDeposit.userId;
-  joinerDeposit.username = winnerDeposit.username;
-  await joinerDeposit.save();
+  broadcast({ type: 'flips', flips: await publicFlips() });
+  broadcast({ type: 'flip_result', flipId: flip._id.toString(), winnerName, winnerId: winnerId.toString() });
 
-  broadcast({ type: 'deposits', deposits: await getPublicDeposits() });
-  broadcast({ type: 'flips', flips: await getPublicFlips() });
-  broadcast({ type: 'flip_result', flipId: flip._id.toString(), winnerUsername: flip.winnerUsername, winnerId: flip.winnerId?.toString() });
+  res.json({ message: 'Flip done!', winnerName });
 
-  res.json({ message: 'Flip complete!', winnerUsername: flip.winnerUsername });
-
-  setTimeout(async () => {
-    broadcast({ type: 'flips', flips: await getPublicFlips() });
-  }, 15000);
+  setTimeout(async () => broadcast({ type: 'flips', flips: await publicFlips() }), 12000);
 });
 
-app.post('/api/flips/cancel', authenticateToken, async (req, res) => {
+// Cancel a flip (creator only, while waiting)
+app.post('/api/flips/cancel', auth, async (req, res) => {
   const { flipId } = req.body;
-  const flip = await Flip.findOne({ _id: flipId, status: 'waiting' });
-  if (!flip) return res.status(404).json({ error: 'Flip not found.' });
-
-  const deposit = await Deposit.findOne({ _id: flip.creatorDepositId, userId: req.user.id });
-  if (!deposit) return res.status(403).json({ error: 'Not your flip.' });
-
+  const flip = await Flip.findOne({ _id: flipId, creatorId: req.user.id, status: 'waiting' });
+  if (!flip) return res.status(404).json({ error: 'Flip not found or already started' });
   flip.status = 'cancelled';
-  deposit.status = 'confirmed';
   await flip.save();
-  await deposit.save();
-
-  broadcast({ type: 'deposits', deposits: await getPublicDeposits() });
-  broadcast({ type: 'flips', flips: await getPublicFlips() });
-  res.json({ message: 'Flip cancelled.' });
+  await Item.findByIdAndUpdate(flip.creatorItemId, { status: 'available' });
+  broadcast({ type: 'flips', flips: await publicFlips() });
+  res.json({ message: 'Flip cancelled' });
 });
 
-// ---- MIDDLEMAN ROUTES ----
-app.post('/api/admin/deposits/create', async (req, res) => {
-  const { secret, username: targetUsername, petName } = req.body;
-  if (secret !== MIDDLEMAN_SECRET) return res.status(403).json({ error: 'Forbidden' });
-  if (!targetUsername || !petName) return res.status(400).json({ error: 'Username and pet name required' });
+// ── MIDDLEMAN ROUTES ──────────────────────────────────────
+function mmAuth(req, res, next) {
+  if (req.body.secret !== MM_SECRET) return res.status(403).json({ error: 'Forbidden' });
+  next();
+}
 
-  const user = await User.findOne({ username: { $regex: new RegExp(`^${targetUsername}$`, 'i') } });
-  if (!user) return res.status(404).json({ error: `No SpinZone account found for "${targetUsername}". They must sign up first.` });
+// Get all pending deposits
+app.post('/api/mm/pending', mmAuth, async (req, res) => {
+  const items = await Item.find({ status: 'pending' }).lean();
+  res.json(items.map(i => ({ ...i, id: i._id.toString() })));
+});
 
-  const existing = await Deposit.findOne({ userId: user._id, status: { $in: ['pending', 'confirmed', 'in_flip'] } });
-  if (existing) return res.status(400).json({ error: `${targetUsername} already has an active deposit (${existing.petName}).` });
+// Get all withdrawal requests
+app.post('/api/mm/withdrawals', mmAuth, async (req, res) => {
+  const items = await Item.find({ status: 'withdraw_requested' }).lean();
+  res.json(items.map(i => ({ ...i, id: i._id.toString() })));
+});
 
+// Confirm deposit — middleman fills in pet name after receiving trade
+app.post('/api/mm/confirm', mmAuth, async (req, res) => {
+  const { itemId, petName } = req.body;
+  if (!petName) return res.status(400).json({ error: 'Pet name required' });
   const rap = await getRAP();
   const match = findPet(rap, petName);
-  if (!match) return res.status(404).json({ error: `Pet "${petName}" not found in PS99 RAP data.` });
-  if (!match.value || match.value === 0) return res.status(400).json({ error: 'This pet has no RAP value.' });
-
-  const deposit = await Deposit.create({
-    userId: user._id,
-    username: user.username,
-    petName: match.configData.id,
-    petValue: match.value,
-    petImage: petImageUrl(match.configData.id),
-    status: 'confirmed',
-  });
-
-  broadcast({ type: 'deposits', deposits: await getPublicDeposits() });
-  broadcast({ type: 'deposit_confirmed', depositId: deposit._id.toString(), username: deposit.username, petName: deposit.petName });
-  res.json({ message: `Deposit created and confirmed for ${user.username} — ${deposit.petName} (${deposit.petValue.toLocaleString()} RAP)`, deposit: { ...deposit.toObject(), id: deposit._id.toString() } });
+  if (!match) return res.status(404).json({ error: `Pet "${petName}" not found in RAP data` });
+  const item = await Item.findById(itemId);
+  if (!item) return res.status(404).json({ error: 'Item not found' });
+  item.petName = match.configData.id;
+  item.petValue = match.value || 0;
+  item.petImage = petImg(match.configData.id);
+  item.status = 'available';
+  await item.save();
+  broadcast({ type: 'inventory_update', userId: item.ownerId.toString() });
+  res.json({ message: `✅ Confirmed ${item.petName} (${item.petValue.toLocaleString()} RAP) for ${item.ownerName}` });
 });
 
-app.post('/api/admin/deposits', async (req, res) => {
-  const { secret } = req.body;
-  if (secret !== MIDDLEMAN_SECRET) return res.status(403).json({ error: 'Forbidden' });
-  const all = await Deposit.find().lean();
-  res.json(all.map(d => ({ ...d, id: d._id.toString() })));
+// Reject a pending deposit
+app.post('/api/mm/reject', mmAuth, async (req, res) => {
+  const { itemId } = req.body;
+  await Item.findByIdAndDelete(itemId);
+  res.json({ message: 'Deposit rejected and removed' });
 });
 
-app.post('/api/admin/deposits/confirm', async (req, res) => {
-  const { secret, depositId } = req.body;
-  if (secret !== MIDDLEMAN_SECRET) return res.status(403).json({ error: 'Forbidden' });
-  const deposit = await Deposit.findById(depositId);
-  if (!deposit) return res.status(404).json({ error: 'Deposit not found.' });
-  if (deposit.status !== 'pending') return res.status(400).json({ error: 'Deposit is not pending.' });
-  deposit.status = 'confirmed';
-  await deposit.save();
-  broadcast({ type: 'deposits', deposits: await getPublicDeposits() });
-  broadcast({ type: 'deposit_confirmed', depositId, username: deposit.username, petName: deposit.petName });
-  res.json({ message: `Confirmed deposit for ${deposit.username} — ${deposit.petName}` });
+// Mark withdrawal as sent (pet traded back in PS99)
+app.post('/api/mm/sent', mmAuth, async (req, res) => {
+  const { itemId } = req.body;
+  const item = await Item.findByIdAndUpdate(itemId, { status: 'withdrawn' }, { new: true });
+  if (!item) return res.status(404).json({ error: 'Item not found' });
+  broadcast({ type: 'inventory_update', userId: item.ownerId.toString() });
+  res.json({ message: `✅ Marked as sent to ${item.ownerName}` });
 });
 
-app.post('/api/admin/deposits/return', async (req, res) => {
-  const { secret, depositId } = req.body;
-  if (secret !== MIDDLEMAN_SECRET) return res.status(403).json({ error: 'Forbidden' });
-  const deposit = await Deposit.findById(depositId);
-  if (!deposit) return res.status(404).json({ error: 'Deposit not found.' });
-  deposit.status = 'returned';
-  await deposit.save();
-  broadcast({ type: 'deposits', deposits: await getPublicDeposits() });
-  res.json({ message: `Deposit marked as returned for ${deposit.username}` });
+// Pet value lookup
+app.get('/api/pet-value', async (req, res) => {
+  const { name } = req.query;
+  if (!name) return res.status(400).json({ error: 'Name required' });
+  const rap = await getRAP();
+  const match = findPet(rap, name);
+  if (!match) return res.status(404).json({ error: 'Pet not found' });
+  res.json({ name: match.configData.id, value: match.value || 0, image: petImg(match.configData.id) });
 });
 
-app.post('/api/admin/deposits/sent', async (req, res) => {
-  const { secret, depositId } = req.body;
-  if (secret !== MIDDLEMAN_SECRET) return res.status(403).json({ error: 'Forbidden' });
-  const deposit = await Deposit.findById(depositId);
-  if (!deposit) return res.status(404).json({ error: 'Deposit not found.' });
-  deposit.status = 'sent';
-  await deposit.save();
-  broadcast({ type: 'deposits', deposits: await getPublicDeposits() });
-  res.json({ message: `Deposit marked as sent to ${deposit.username}` });
-});
-
-server.listen(PORT, () => {
-  console.log(`SpinZone server running at http://localhost:${PORT}`);
-});
+server.listen(PORT, () => console.log(`SpinZone running on port ${PORT}`));
