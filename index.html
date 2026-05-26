@@ -870,6 +870,61 @@ function openDepositModal() {
       }
     } catch { showNotice('❌ Could not connect to server.'); }
   }
+
+  async function cancelFlip(flipId) {
+  if (!confirm('Cancel this flip?')) return;
+  try {
+    const res = await fetch(`${API}/api/flips/cancel`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      body: JSON.stringify({ flipId })
+    });
+    const data = await res.json();
+    if (!res.ok) showNotice('❌ ' + data.error);
+  } catch { showNotice('❌ Could not connect to server.'); }
+}
+
+function openJoinFlipModal(flipId, creatorValue, creatorPetName) {
+  if (!token) { alert('🔒 Login to join a flip!'); location.href = 'login.html'; return; }
+  const myConfirmed = myDeposits.filter(d => d.status === 'confirmed');
+  if (myConfirmed.length === 0) {
+    alert('You need a confirmed deposit to join a flip. Deposit a pet first!');
+    return;
+  }
+  selectedFlipId = flipId;
+  document.getElementById('joinFlipDesc').textContent = `Join flip against ${creatorPetName} (${Number(creatorValue).toLocaleString()} RAP). Your pet must be within 10%.`;
+  hideErr('joinFlipErr');
+  const picker = document.getElementById('joinFlipPicker');
+  picker.innerHTML = myConfirmed.map(d => `
+    <div class="picker-card" onclick="selectJoinFlipDeposit('${d.id}', this)">
+      <img src="${d.petImage}" onerror="this.style.display='none'" alt="" />
+      <div class="pname">${d.petName}</div>
+      <div class="pval">${d.petValue.toLocaleString()} RAP</div>
+    </div>
+  `).join('');
+  openModal('joinFlipModal');
+}
+
+function selectJoinFlipDeposit(id, el) {
+  selectedJoinDepositId = id;
+  document.querySelectorAll('#joinFlipPicker .picker-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+async function submitJoinFlip() {
+  if (!selectedJoinDepositId) { showErr('joinFlipErr', 'Select one of your deposits first.'); return; }
+  try {
+    const res = await fetch(`${API}/api/flips/join`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      body: JSON.stringify({ flipId: selectedFlipId, depositId: selectedJoinDepositId })
+    });
+    const data = await res.json();
+    if (res.ok) { closeModal('joinFlipModal'); }
+    else showErr('joinFlipErr', data.error);
+  } catch { showErr('joinFlipErr', 'Could not connect to server.'); }
+}
+</script>
 </script>
 </body>
 </html>
