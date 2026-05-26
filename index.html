@@ -172,7 +172,7 @@
 <!-- DEPOSIT MODAL -->
 <div class="overlay" id="depositModal">
   <div class="modal">
-    <button class="modal-x" onclick="close('depositModal')">✕</button>
+    <button class="modal-x" onclick="mClose('depositModal')">✕</button>
     <h2>Deposit a Pet</h2>
     <p class="modal-sub">Submit a request, then trade your pet to our middleman in PS99.</p>
     <div class="err" id="depositErr"></div>
@@ -188,7 +188,7 @@
 <!-- INVENTORY MODAL -->
 <div class="overlay" id="inventoryModal">
   <div class="modal" style="max-width:500px">
-    <button class="modal-x" onclick="close('inventoryModal')">✕</button>
+    <button class="modal-x" onclick="mClose('inventoryModal')">✕</button>
     <h2>My Inventory</h2>
     <p class="modal-sub">Your confirmed pets. Click one to withdraw it.</p>
     <div id="invModalContent"><div class="empty" style="padding:2rem">Loading...</div></div>
@@ -198,7 +198,7 @@
 <!-- CREATE FLIP MODAL -->
 <div class="overlay" id="createFlipModal">
   <div class="modal">
-    <button class="modal-x" onclick="close('createFlipModal')">✕</button>
+    <button class="modal-x" onclick="mClose('createFlipModal')">✕</button>
     <h2>Create Flip</h2>
     <p class="modal-sub">Pick a pet from your inventory to put up for a 50/50 flip.</p>
     <div class="err" id="createFlipErr"></div>
@@ -210,7 +210,7 @@
 <!-- JOIN FLIP MODAL -->
 <div class="overlay" id="joinFlipModal">
   <div class="modal">
-    <button class="modal-x" onclick="close('joinFlipModal')">✕</button>
+    <button class="modal-x" onclick="mClose('joinFlipModal')">✕</button>
     <h2>Join Flip</h2>
     <p class="modal-sub" id="joinFlipDesc"></p>
     <div class="err" id="joinFlipErr"></div>
@@ -250,8 +250,8 @@ if (myUsername) {
 function logout() { localStorage.clear(); location.href = 'index.html'; }
 
 // MODAL HELPERS
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function mOpen(id) { document.getElementById(id).classList.add('open'); }
+function mClose(id) { document.getElementById(id).classList.remove('open'); }
 function showErr(id, msg) { const e = document.getElementById(id); e.style.display='block'; e.textContent='❌ '+msg; }
 function hideErr(id) { document.getElementById(id).style.display='none'; }
 
@@ -331,7 +331,7 @@ async function requestWithdraw(itemId, petName) {
       body: JSON.stringify({ itemId })
     });
     const d = await r.json();
-    if (r.ok) { close('inventoryModal'); showNotice('↩ ' + d.message); loadInventory(); }
+    if (r.ok) { mClose('inventoryModal'); showNotice('↩ ' + d.message); loadInventory(); }
     else showNotice('❌ ' + d.error);
   } catch { showNotice('❌ Could not connect'); }
 }
@@ -339,14 +339,14 @@ async function requestWithdraw(itemId, petName) {
 function openInventoryModal() {
   if (!token) { location.href = 'login.html'; return; }
   renderInvModal();
-  open('inventoryModal');
+  mOpen('inventoryModal');
 }
 
 // DEPOSIT
 function openDepositModal() {
   if (!token) { location.href = 'login.html'; return; }
   hideErr('depositErr');
-  open('depositModal');
+  mOpen('depositModal');
 }
 
 async function submitDeposit() {
@@ -357,7 +357,7 @@ async function submitDeposit() {
       body: JSON.stringify({})
     });
     const d = await r.json();
-    if (r.ok) { close('depositModal'); showNotice('📦 ' + d.message); loadInventory(); }
+    if (r.ok) { mClose('depositModal'); showNotice('📦 ' + d.message); loadInventory(); }
     else showErr('depositErr', d.error);
   } catch { showErr('depositErr', 'Could not connect to server'); }
 }
@@ -377,7 +377,7 @@ function openCreateFlipModal() {
       <div class="pval">${i.petValue.toLocaleString()} RAP</div>
     </div>
   `).join('');
-  open('createFlipModal');
+  mOpen('createFlipModal');
 }
 
 function selectItem(type, id, el) {
@@ -396,7 +396,7 @@ async function submitCreateFlip() {
       body: JSON.stringify({ itemId: selectedCreateItem })
     });
     const d = await r.json();
-    if (r.ok) { close('createFlipModal'); loadInventory(); }
+    if (r.ok) { mClose('createFlipModal'); loadInventory(); }
     else showErr('createFlipErr', d.error);
   } catch { showErr('createFlipErr', 'Could not connect'); }
 }
@@ -418,7 +418,7 @@ function openJoinModal(flipId, creatorPetName, creatorPetValue) {
       <div class="pval">${i.petValue.toLocaleString()} RAP</div>
     </div>
   `).join('');
-  open('joinFlipModal');
+  mOpen('joinFlipModal');
 }
 
 async function submitJoinFlip() {
@@ -429,7 +429,7 @@ async function submitJoinFlip() {
       body: JSON.stringify({ flipId: activeJoinFlipId, itemId: selectedJoinItem })
     });
     const d = await r.json();
-    if (r.ok) { close('joinFlipModal'); loadInventory(); }
+    if (r.ok) { mClose('joinFlipModal'); loadInventory(); }
     else showErr('joinFlipErr', d.error);
   } catch { showErr('joinFlipErr', 'Could not connect'); }
 }
